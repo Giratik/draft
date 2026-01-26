@@ -9,7 +9,7 @@
 
 :- use_module(state).
 :- use_module(world).
-
+%!!! jeu par défaut below
 wumpus_example(
     world{ 
         eternals:eternals{ 
@@ -50,7 +50,7 @@ wumpus_example(
         fluents:fluents{ 
             alive:[hunter{id:hunter},wumpus{id:wumpus1}],
             dir:[dir{d:north,h:hunter{id:hunter}}],
-            fat_gold:[fat{c:c{x:2,y:3},g:gold{id:gold}}],
+            fat_gold:[fat{c:c{x:2,y:3},g:gold{id:gold1}}],
             fat_hunter:fat{c:c{x:1,y:1},h:hunter{id:hunter}},
             has_arrow:[has{a:arrow{id:arrow1},h:hunter{id:hunter}}],
             has_gold:[],

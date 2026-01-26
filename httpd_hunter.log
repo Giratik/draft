@@ -1,0 +1,8 @@
+server(started, 1769444742).
+/*Mon Jan 26 17:25:41 2026*/ request(1, 1769444741.508, [peer(ip(127,0,0,1)),method(options),request_uri('/action'),path('/action'),http_version(1-1),host(localhost),port(8081),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),access_control_request_method('PUT'),access_control_request_headers('content-type'),referer('http://172.31.128.1:9000/'),origin('http://172.31.128.1:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('cross-site'),priority('u=4')]).
+completed(1, 0.03125, 0, 200, ok).
+/*Mon Jan 26 17:25:41 2026*/ request(2, 1769444741.554, [peer(ip(127,0,0,1)),method(put),request_uri('/action'),path('/action'),http_version(1-1),host(localhost),port(8081),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://172.31.128.1:9000/'),content_type('application/json'),content_length(28),origin('http://172.31.128.1:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('cross-site'),priority('u=0')]).
+Hunter received beliefs: _15110{}
+Hunter received percepts: []
+completed(2, 0.0, 63, 200, ok).
+server(stopped, 1769444983).

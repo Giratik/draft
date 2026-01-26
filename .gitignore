@@ -1,1 +1,3 @@
 httpd.log
+node_modules
+.quasar

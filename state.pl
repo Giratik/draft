@@ -7,7 +7,7 @@
 :- use_module(ontology).
 :- use_module(library(http/http_log)).
 
-update_state(Eternals, _, CurrentFluents, Action, NextFluents) :- 
+update_state(Eternals, _, CurrentFluents, Action, NextFluents) :- %calcul les effets des actions
     http_log("Calculating effects of ~w \n", [Action]),
     effects(Eternals, CurrentFluents, Action, NextFluents).
 
