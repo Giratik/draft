@@ -1,4 +1,4 @@
-:- module(ontology, [doables/3, effects/4, adjacent/3]).
+:- module(ontology, [doables/3, effects/4, adjacent/3, next_pos/3]).
 :- use_module(library(clpfd)).
 :- use_module(library(http/http_log)).
 
