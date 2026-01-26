@@ -228,11 +228,14 @@ export interface Beliefs {
   certain_eternals: CertainEternals;
   certain_fluents: Fluents;
   uncertain_eternals: UncertainEternals;
-  // To me this seems unnecessary, but it's in the original model
-  // The reason for this is that you can derive fatal from
-  // the eternals
   uncertain_fluents: UncertailFluents;
+  safeCells: Position[];
+  breezesuspectCells: Position[];
+  stenchsuspectCells: Position[];
+  pitCells: Position[];
+  wumpusCells: Position[];
 }
+
 export class HunterState {
   beliefs: Beliefs;
   percepts: Percept[];
@@ -249,7 +252,7 @@ export class HunterState {
         certain_fluents: {
           game_state: worldState.fluents.game_state,
           score: worldState.fluents.score,
-          alive: [{ id: 'hunter' }, { id: 'wumpus' }] as ObjectWithId[],
+          alive: [{ id: 'hunter' }] as ObjectWithId[],
           dir: worldState.fluents.dir,
           fat_gold: [],
           fat_hunter: worldState.fluents.fat_hunter,
@@ -264,6 +267,11 @@ export class HunterState {
         uncertain_fluents: {
           fatal: [],
         },
+        safeCells: [],
+        breezesuspectCells: [],
+        stenchsuspectCells: [],
+        pitCells: [],
+        wumpusCells: [],
       };
     } else if (json?.beliefs && json?.percepts) {
       this.beliefs = json.beliefs;

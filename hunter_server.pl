@@ -5,6 +5,9 @@
 :- use_module(library(http/http_cors)).
 :- use_module(library(http/http_log)).
 
+% AJOUTER CETTE LIGNE :
+:- use_module(ontology).
+
 % Configuration du serveur
 :- set_setting(http:logfile, 'httpd_hunter.log').
 :- set_setting(http:cors, [*]).
@@ -71,13 +74,47 @@ handle_hunter_request(Request) :-
     reply_json_dict(Response).
 
 
-% ----------------------------------------------------------------------
-% Stub pour l'IA (À REMPLACER PAR VOTRE PROPRE LOGIQUE)
-% ----------------------------------------------------------------------
-% Pour tester si le serveur marche, ce prédicat fait avancer le Hunter bêtement
-run_agent_turn(Beliefs, _Percepts, Beliefs, move). 
-% Note : Dans la vraie implémentation, 'move' doit être remplacé par 
-% l'action décidée (move, turnLeft, shoot, etc.) et Beliefs doit être mis à jour.
+% ======================================================================
+% LOGIQUE DU HUNTER (Cerveau)
+% ======================================================================
+
+% Cas 1 : Si ça brille (glitter), on RAMASSE l'or !
+run_agent_turn(Beliefs, Percepts, NewBeliefs, grab) :-
+    member(glitter, Percepts),
+    !,
+    http_log('PERCEPT: Glitter! Action: GRAB~n', []),
+    % Ici, idéalement, on devrait mettre à jour Beliefs pour dire "j'ai l'or"
+    NewBeliefs = Beliefs.
+
+% Cas 2 : Si on s'est cogné (bump), on TOURNE (pour se débloquer)
+run_agent_turn(Beliefs, Percepts, NewBeliefs, left) :-
+    member(bump, Percepts),
+    !,
+    http_log('PERCEPT: Bump! Action: LEFT~n', []),
+    % Ici, on devrait mettre à jour l'orientation dans Beliefs
+    NewBeliefs = Beliefs.
+
+% Cas 3 : Comportement par défaut -> AVANCER
+run_agent_turn(Beliefs, _Percepts, NewBeliefs, move) :-
+% 1. Récupérer l'état actuel supposé (Fluents)
+    dict_pairs(Beliefs.certain_fluents, _, Pairs),
+    dict_create(Fluents, fluents, Pairs),
+    
+    % 2. Récupérer les murs connus (Eternals)
+    dict_pairs(Beliefs.certain_eternals, _, EPairs),
+    dict_create(Eternals, eternals, EPairs),
+
+    % 3. Utiliser l'ontologie pour calculer l'effet du mouvement
+    % Note : Cela nécessite que 'ontology' soit importé et compatible
+    (catch(effects(Eternals, Fluents, move, NewFluents), _, fail) ->
+        true
+    ;
+        NewFluents = Fluents % Si erreur, on garde l'ancien état
+    ),
+
+    % 4. Mettre à jour les croyances
+    NewBeliefs = Beliefs.put(certain_fluents, NewFluents),
+    http_log('Action: MOVE (Beliefs updated)~n', []).
 
 
 % ----------------------------------------------------------------------
