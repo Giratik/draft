@@ -269,7 +269,6 @@ export const useWumpusStore = defineStore('wumpus', {
             console.log('pitCells', this.hunterState.beliefs.pitCells);
        console.log('wumpusCells', this.hunterState.beliefs.wumpusCells); //CHECK
 
-// CORRECTION ICI : Port 8081 au lieu de 8080
       fetch('http://localhost:8081/action', {
         method: 'PUT',
         headers: {
