@@ -169,3 +169,54 @@ Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
 			   visited: [v{from:c{x:1,y:1},to:c{x:1,y:2}}]
 			 }
 Calculated Next Percepts: [stench]completed(4, 0.21875000000000003, 469, 200, ok).
+server(started, 1769769648).
+/*Fri Jan 30 11:41:34 2026*/ request(1, 1769769694.734, [peer(ip(127,0,0,1)),method(options),request_uri('/default'),path('/default'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),access_control_request_method('PUT'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(1, 0.0625, 0, 200, ok).
+/*Fri Jan 30 11:41:34 2026*/ request(2, 1769769694.814, [peer(ip(127,0,0,1)),method(put),request_uri('/default'),path('/default'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0'),content_length(0)]).
+completed(2, 0.0, 2476, 200, ok).
+/*Fri Jan 30 11:41:42 2026*/ request(3, 1769769702.734, [peer(ip(127,0,0,1)),method(options),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),access_control_request_method('PUT'),access_control_request_headers('content-type'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(3, 0.0, 0, 200, ok).
+/*Fri Jan 30 11:41:42 2026*/ request(4, 1769769702.769, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(2223),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+SIM: Received Action move
+Updating State w/ action: moveCalculating effects of move 
+Trying case 1 for Move 
+Trying case 2 for Move 
+Trying case 3 for Move 
+Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
+			   dir: [dir{d:north,h:hunter{id:hunter}}],
+			   fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+			   fat_hunter: fat{ c: c{x:1,y:2},
+					    h: hunter{id:hunter}
+					  },
+			   game_state: running,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [],
+			   score: -1,
+			   visited: [v{from:c{x:1,y:1},to:c{x:1,y:2}}]
+			 }
+Calculated Next Percepts: [stench]completed(4, 0.1875, 469, 200, ok).
+/*Fri Jan 30 11:41:45 2026*/ request(5, 1769769705.597, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(2266),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+SIM: Received Action right
+Updating State w/ action: rightCalculating effects of right 
+Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
+			   dir: [dir{d:east,h:hunter{id:hunter}}],
+			   fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+			   fat_hunter: _{c:_{x:1,y:2},h:_{id:hunter}},
+			   game_state: running,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [],
+			   score: -2,
+			   visited: [_{from:_{x:1,y:1},to:_{x:1,y:2}}]
+			 }
+Calculated Next Percepts: [stench]completed(5, 0.21875, 468, 200, ok).
+/*Fri Jan 30 11:51:24 2026*/ request(6, 1769770284.521, [peer(ip(127,0,0,1)),method(options),request_uri('/default'),path('/default'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),access_control_request_method('PUT'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(6, 0.0, 0, 200, ok).
+/*Fri Jan 30 11:51:24 2026*/ request(7, 1769770284.551, [peer(ip(127,0,0,1)),method(put),request_uri('/default'),path('/default'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0'),content_length(0)]).
+completed(7, 0.0, 2476, 200, ok).
+server(stopped, 1769770681).
