@@ -47,7 +47,7 @@ Nous avons modifié 3 fichiers pour créer un agent capable d'analyser son envir
 ## models.ts
 Nous définissons dans ce fichier la composition du fichier json qui permet d'enregistrer les différents éléments du monde
 que va rencontrer le hunter. Nous avons ajouté au fichier initial : 
-- safeCells pour enregistrer les cases considérés sans danger
+- safeCells pour enregistrer les cases considérées sans danger
 - breezesuspectCells où sont enregistrés les cases voisines à celle sentant une brise
 - stenchsuspectCells où sont enregistrés les cases voisines à celle sentant une odeur
 - pitCells où sont enregistrés les cases qui sont à coup sûr des trous

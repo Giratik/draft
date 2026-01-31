@@ -1,25 +1,22 @@
 :- module(logic, [run_hunter/0]).
 
-% --- 1. IMPORTS ---
+% --- IMPORTS ---
 :- use_module(library(http/http_server)).
 :- use_module(library(http/http_json)).
 :- use_module(library(http/http_cors)).
+:- use_module(library(clpfd)).
+:- use_module(library(pita)).
 
-% MOTEURS IA
-:- use_module(library(clpfd)). % Contraintes
-:- use_module(library(pita)).  % Probabilités Exactes (remplace mcintyre)
-
-% Initialisation de PITA
 :- pita.
 
 :- set_setting(http:cors, [*]).
 :- cors_enable.
 
-% --- 2. SERVEUR HTTP ---
+% --- SERVEUR ---
 
 run_hunter :-
     http_server(http_dispatch, [port(8081)]),
-    format(user_error, '~n[SERVER] Hunter Agent (PITA + CLP) running on port 8081...~n', []).
+    format(user_error, '~n[SERVER] Hunter Agent (FIXED) running on 8081...~n', []).
 
 :- http_handler(root(action), handle_hunter_request, []).
 
@@ -32,44 +29,37 @@ handle_hunter_request(Request) :-
     http_read_json_dict(Request, RequestJSON, [value_string_as(atom), tag('')]),
     _{ beliefs: BeliefsDict, percepts: RawPercepts } :< RequestJSON,
     (is_list(RawPercepts) -> Percepts = RawPercepts ; Percepts = []),
-    
-    % LOG CONSOLE
+
+    % Logs
     format(user_error, '~n---------------------------------------------------~n', []),
-    format(user_error, '[PERCEPT] Recu: ~w~n', [Percepts]),
-
-    % 1. Conversion
-    ( catch(extract_fluents(BeliefsDict.certain_fluents, CurrentState), _, fail)
+    
+    % Extraction
+    ( catch(extract_state(BeliefsDict, CurrentState), _, fail)
     -> true 
-    ;  CurrentState = [at(1,1)], format(user_error, '[WARN] State vide -> Fallback at(1,1)~n', [])
+    ;  CurrentState = [at(1,1), facing(north)], format(user_error, '[WARN] Extraction fail~n', [])
     ),
-    format(user_error, '[STATE] Position actuelle: ~w~n', [CurrentState]),
+    format(user_error, '[STATE] ~w~n', [CurrentState]),
 
-    % 2. Appel Probabiliste (PITA)
-    % On utilise prob/2 au lieu de mc_sample_arg.
-    % prob(:Query, -Probability) va essayer de prouver la requête et donner sa proba.
-    ( catch(prob(choose_action_prob(CurrentState, Percepts, Action, NewStateList), Prob), Error, true)
+    % Décision PITA
+    ( catch(prob(choose_action_prob(CurrentState, Percepts, A, NS), Prob), Error, true)
     -> 
         ( var(Error) ->
-            % Succès
-            format(user_error, '[DECISION] PITA Action: ~w (Prob: ~2f) (NewState: ~w)~n', [Action, Prob, NewStateList]),
-            format(atom(DebugMsg), 'PITA Action: ~w (P=~2f)', [Action, Prob])
+            Action = A, NewState = NS,
+            format(user_error, '[DECISION] Action: ~w (P=~2f) -> Vers: ~w~n', [Action, Prob, NewState]),
+            format(atom(DebugMsg), 'Act: ~w', [Action])
         ;
-            % Erreur interne
-            format(user_error, '[CRASH] Erreur PITA: ~w~n', [Error]),
-            Action = move, NewStateList = CurrentState, DebugMsg = 'PITA Crashed'
+            format(user_error, '[CRASH PITA] ~w~n', [Error]),
+            Action = move, NewState = CurrentState, DebugMsg = 'Crash'
         )
     ;
-        % Echec logique (Aucune règle ne s'applique)
-        format(user_error, '[FAIL] PITA n\'a trouve aucune solution !~n', []),
-        Action = move, NewStateList = CurrentState, DebugMsg = 'PITA Failed'
+        % Si tout échoue, on force un mouvement aléatoire pour débloquer
+        format(user_error, '[FAIL] Aucune regle ! Force Right.~n', []),
+        Action = right, NewState = CurrentState, DebugMsg = 'Stuck'
     ),
 
-    % 3. Réponse
-    update_fluents_dict(BeliefsDict.certain_fluents, NewStateList, UpdatedFluentsDict),
-    put_dict(certain_fluents, BeliefsDict, UpdatedFluentsDict, NewBeliefsDict),
-
+    update_fluents_dict(BeliefsDict, NewState, UpdatedBeliefsDict),
     Response = _{
-        hunterState: _{ beliefs: NewBeliefsDict, percepts: Percepts },
+        hunterState: _{ beliefs: UpdatedBeliefsDict, percepts: Percepts },
         action: Action,
         debug: DebugMsg
     },
@@ -77,67 +67,125 @@ handle_hunter_request(Request) :-
     reply_json_dict(Response).
 
 
-% --- 3. MOTEUR CLP (DÉTERMINISTE & HORS LPAD) ---
-% Doit rester hors du bloc lpad pour éviter les conflits d'instanciation
+% --- MOTEUR PHYSIQUE (CLP) ---
 
-solve_movement_clp(State, NewState) :-
-    ( member(at(X,Y), State) -> true ; X=1, Y=1 ),
+physics_move(State, NewState) :-
+    member(at(X,Y), State),
+    member(facing(Dir), State),
     
-    % Logique simple : Aller à l'EST (Pour l'instant)
-    delta(east, DX, DY),
+    delta(Dir, DX, DY),
     NextX #= X + DX,
     NextY #= Y + DY,
     
-    NextX in 0..5, 
-    NextY in 0..5,
-    
-    % Labeling est CRUCIAL ici pour que PITA reçoive des entiers, pas des variables CLP
+    % FIX: Domaine large pour accepter 0..3 ou 1..4 sans planter
+    NextX in 0..10, NextY in 0..10,
     label([NextX, NextY]),
     
-    ( select(at(X,Y), State, at(NextX, NextY), TempState) 
-    -> NewState = TempState
-    ;  NewState = [at(NextX, NextY)] ).
+    select(at(X,Y), State, at(NextX, NextY), NewState).
 
-delta(north, 0, 1).
-delta(south, 0, -1).
-delta(east, 1, 0).
-delta(west, -1, 0).
+physics_turn_right(State, NewState) :-
+    member(facing(Dir), State),
+    next_dir_right(Dir, NewDir),
+    select(facing(Dir), State, facing(NewDir), NewState).
 
+physics_turn_left(State, NewState) :-
+    member(facing(Dir), State),
+    next_dir_left(Dir, NewDir),
+    select(facing(Dir), State, facing(NewDir), NewState).
 
-% --- 4. UTILITAIRES ---
+delta(north, 0, 1).   delta(south, 0, -1).
+delta(east, 1, 0).    delta(west, -1, 0).
 
-extract_fluents(Dict, StateList) :-
-    % Extraction flexible (fat_hunter ou direct)
-    ( get_dict(fat_hunter, Dict, H), get_dict(c, H, Pos), get_dict(x, Pos, X), get_dict(y, Pos, Y)
-    ; get_dict(x, Dict, X), get_dict(y, Dict, Y)
-    ),
-    number(X), number(Y), !,
-    StateList = [at(X,Y)].
+next_dir_right(north, east). next_dir_right(east, south).
+next_dir_right(south, west). next_dir_right(west, north).
 
-extract_fluents(_, [at(1,1)]). % Fallback final
-
-update_fluents_dict(Dict, NewState, NewDict) :-
-    ( member(at(NX, NY), NewState)
-    -> NewPos = c{x:NX, y:NY},
-       % Préservation de structure
-       ( get_dict(fat_hunter, Dict, _) 
-       -> put_dict(fat_hunter, Dict, fat{c:NewPos, h:hunter{id:hunter}}, NewDict)
-       ;  put_dict(fat_hunter, Dict, fat{c:NewPos}, NewDict) ) % Si structure simple
-    ;  NewDict = Dict ).
+next_dir_left(north, west).  next_dir_left(west, south).
+next_dir_left(south, east).  next_dir_left(east, north).
 
 
-% --- 5. CERVEAU PROBABILISTE (LPAD - PITA) ---
+% --- EXTRACTION (CONVERSION STRICTE DES NOMBRES) ---
+
+extract_state(BeliefsDict, State) :-
+    Fluents = BeliefsDict.certain_fluents,
+
+    % 1. Position & Orientation
+    get_dict(fat_hunter, Fluents, H), get_dict(c, H, Pos),
+    safe_number(Pos.x, X), safe_number(Pos.y, Y), % Utilisation de safe_number
+
+    ( get_dict(dir, Fluents, DirList), member(DObj, DirList), get_dict(d, DObj, DirAtom)
+    -> Dir = DirAtom ; Dir = north ),
+
+    BaseState = [at(X,Y), facing(Dir)],
+
+    % 2. Listes (Safe, Pit, etc.)
+    ( get_dict(safeCells, BeliefsDict, SafeJSON) -> maplist(json_to_term(safe), SafeJSON, SafeTerms) ; SafeTerms = [] ),
+    ( get_dict(pitCells, BeliefsDict, PitJSON) -> maplist(json_to_term(pit), PitJSON, PitTerms) ; PitTerms = [] ),
+    ( get_dict(wumpusCells, BeliefsDict, WumpJSON) -> maplist(json_to_term(wumpus), WumpJSON, WumpTerms) ; WumpTerms = [] ),
+    
+    append(BaseState, SafeTerms, S1),
+    append(S1, PitTerms, S2),
+    append(S2, WumpTerms, State).
+
+% FIX: Force la conversion en nombre (même si c'est un atome '1')
+safe_number(Val, Num) :- number(Val), !, Num = Val.
+safe_number(Atom, Num) :- atom(Atom), atom_number(Atom, Num).
+
+% Utilitaire de conversion liste
+json_to_term(Functor, PointDict, Term) :-
+    safe_number(PointDict.x, X), 
+    safe_number(PointDict.y, Y),
+    Term =.. [Functor, X, Y].
+
+update_fluents_dict(BeliefsDict, NewState, NewBeliefsDict) :-
+    ( member(at(NX, NY), NewState), member(facing(NDir), NewState)
+    -> 
+       Fluents = BeliefsDict.certain_fluents,
+       NewPos = c{x:NX, y:NY},
+       (get_dict(fat_hunter, Fluents, OldH) -> put_dict(c, OldH, NewPos, NewH) ; NewH = fat{c:NewPos}),
+       put_dict(fat_hunter, Fluents, NewH, F1),
+       NewDirObj = d{d:NDir, h:hunter{id:hunter}},
+       put_dict(dir, F1, [NewDirObj], F2),
+       put_dict(certain_fluents, BeliefsDict, F2, NewBeliefsDict)
+    ;  NewBeliefsDict = BeliefsDict ).
+
+
+% --- CERVEAU LPAD ---
 
 :- begin_lpad.
 
-% Règle 1 : Si Or, on ramasse (Probabilité 1.0 implicite)
+% 1. OR
 choose_action_prob(State, Percepts, grab, State) :-
     member(glitter, Percepts).
 
-% Règle 2 : Sinon, on appelle le moteur CLP externe
+% 2. MOVE (Si safe devant)
 choose_action_prob(State, _Percepts, move, NewState) :-
-    % once/1 est recommandé pour éviter que PITA ne cherche inutilement d'autres solutions
-    % si le mouvement est déterministe.
-    once(solve_movement_clp(State, NewState)).
+    call(physics_move(State, NewState)),
+    member(at(NextX, NextY), NewState),
+    member(safe(NextX, NextY), State).
+
+% 3. ROTATION INTELLIGENTE (Si safe sur les côtés)
+% Si safe à DROITE (relativement), tourner à droite
+choose_action_prob(State, _Percepts, right, NewState) :-
+    call(physics_turn_right(State, NewState)), % On simule le tour
+    member(facing(NewDir), NewState),          % On regarde la nouvelle direction
+    member(at(X,Y), State),                    % On regarde où on est
+    % Si on avançait dans cette nouvelle direction...
+    call(delta(NewDir, DX, DY)),
+    TargetX #= X + DX, TargetY #= Y + DY, call(label([TargetX, TargetY])),
+    % ... est-ce que ce serait safe ?
+    member(safe(TargetX, TargetY), State).
+
+% Si safe à GAUCHE, tourner à gauche
+choose_action_prob(State, _Percepts, left, NewState) :-
+    call(physics_turn_left(State, NewState)),
+    member(facing(NewDir), NewState),
+    member(at(X,Y), State),
+    call(delta(NewDir, DX, DY)),
+    TargetX #= X + DX, TargetY #= Y + DY, call(label([TargetX, TargetY])),
+    member(safe(TargetX, TargetY), State).
+
+% 4. FALLBACK (Si coincé, tourner à droite par défaut)
+choose_action_prob(State, _Percepts, right, NewState) :-
+    call(physics_turn_right(State, NewState)).
 
 :- end_lpad.
