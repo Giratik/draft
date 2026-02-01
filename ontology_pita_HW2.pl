@@ -1,4 +1,4 @@
-:- module(ontology, [doables/3, effects/4, adjacent/3]).
+:- module(ontology, [doables/3, effects/4, adjacent/3, next_pos/3]).
 :- use_module(library(clpfd)).
 :- use_module(library(http/http_log)).
 
@@ -37,7 +37,7 @@ doables(Eternals, Fluents, Doables) :-
     findall(Action, doable(Eternals, Fluents, Action), Doables).
 
 %% calculate the next position of the hunter given his direction
-next_pos(c{x:X,y:Y}, north, c{x:X,y:Y1}) :- Y1 #= Y + 1.
+next_pos(c{x:X,y:Y}, north, c{x:X,y:Y1}) :- Y1 #= Y + 1. %position suivante est vers le nord => alors y +=1
 next_pos(c{x:X,y:Y}, south, c{x:X,y:Y1}) :- Y1 #= Y - 1.
 next_pos(c{x:X,y:Y}, east, c{x:X1,y:Y}) :- X1 #= X + 1.
 next_pos(c{x:X,y:Y}, west, c{x:X1,y:Y}) :- X1 #= X - 1.
@@ -53,17 +53,17 @@ turn_right(west, north).
 
 
 fatal(Eternals, Fluents, Position) :-
-    member(PitEat, Eternals.eat_pit),
-    PitEat.c = Position,
+    member(PitEat, Eternals.eat_pit), %il y un pit
+    PitEat.c = Position,    %on check la position
     \+ (
         member(WumpusEat, Eternals.eat_wumpus),
         WumpusEat.c = Position,
-        \+ (member(WumpusEat.w, Fluents.alive))
+        \+ (member(WumpusEat.w, Fluents.alive)) %le wumpus peut se trouver sur une case pit, en le tuant il bouche le trou
     ).
 fatal(Eternals, Fluents, Position) :-
     member(WumpusEat, Eternals.eat_wumpus),
     WumpusEat.c = Position,
-    member(WumpusEat.w, Fluents.alive).
+    member(WumpusEat.w, Fluents.alive). %wumpus même case et vivant
 
 %% calculate the effects of an action
 effects(Eternals, Fluents, move, ResultingFluents) :-
@@ -139,10 +139,11 @@ effects(_, Fluents, grab, ResultingFluents) :-
                         .put(score,NewScore).
 
 effects(_, Fluents, grab, ResultingFluents) :-
-    Fluents.fat_hunter = fat{c:Pos, h:hunter{id:hunter}},
-    Fluents.fat_gold = Golds,
+    Fluents.fat_hunter = fat{c:Pos, h:hunter{id:hunter}}, %on vérifie la position du chasseur
+    Fluents.fat_gold = Golds,   %idem pour l'or
     member(Gold, Golds),
     \+ (fat{c:Pos, g:gold{id:_}} = Gold),
+%selectchk(Gold, Golds, NewGolds),
     NewScore #= Fluents.score - 1,
     ResultingFluents = Fluents.put(score,NewScore).
 
@@ -177,11 +178,11 @@ effects(Eternals, Fluents, shoot, ResultingFluents) :-
     NewScore #= Fluents.score - 10,
     ResultingFluents = Fluents.put(has_arrow, NewArrows).put(score,NewScore).
 
-%%% Climb not  on exit
+%%% Climb not  on exit %action exit
 effects(Eternals, Fluents, climb, ResultingFluents) :-
     ExitPos = Eternals.eat_exit.c,
     Fluents.fat_hunter = fat{c:HunterPos, h:hunter{id:hunter}},
-    ExitPos \= HunterPos,
+    ExitPos \= HunterPos, %l'un ne s'unifie pas à l'autre
     NewScore #= Fluents.score - 1,
     ResultingFluents = Fluents.put(score,NewScore).
 
@@ -219,7 +220,7 @@ in_direction(Fluents, Eternals, HunterPosition, HunterDirection, ShotWId, ShotWP
     XP = HunterPosition.x, YP = HunterPosition.y,
     %% Find all the wumpuses that are in the same direction (same X coordinate in this case since it is looking up)
     %% and that have a larger Y position (since it is looking up)
-    findall(
+    findall( %donc les Y plus petits sont ignorés
         eat{c:Pos,w:W}, 
         (
             member(eat{c:Pos,w:W}, Eternals.eat_wumpus),
@@ -262,7 +263,7 @@ in_direction(Fluents, Eternals, HunterPosition, HunterDirection, ShotWId, ShotWP
             member(eat{c:Pos,w:W}, Eternals.eat_wumpus),
             member(W, Fluents.alive),
             % WPosition::(x(XP),y(YW)),
-            Pos.x #> XP, Pos.y #= YP
+            Pos.x #< XP, Pos.y #= YP
         ), 
         Ws
     ),
@@ -324,3 +325,5 @@ in_direction(Fluents, Eternals, HunterPosition, HunterDirection, ShotWId, ShotWP
         ) 
     ),
     !.
+
+

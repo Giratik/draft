@@ -1,179 +1,146 @@
 :- module(logic, [run_hunter/0]).
 
-% --- IMPORTS ---
+% --- 1. IMPORTS & CONFIGURATION ---
 :- use_module(library(http/http_server)).
 :- use_module(library(http/http_json)).
 :- use_module(library(http/http_cors)).
 :- use_module(library(clpfd)).
 :- use_module(library(pita)).
 
-:- pita.
+:- pita. % Initialisation du moteur probabiliste
 
 :- set_setting(http:cors, [*]).
 :- cors_enable.
 
-% --- SERVEUR ---
+% --- 2. SERVEUR HTTP ---
 
 run_hunter :-
     http_server(http_dispatch, [port(8081)]),
-    format(user_error, '~n[SERVER] Hunter Agent (Smart) running on 8081...~n', []).
+    format(user_error, '~n[SERVER] Hunter (Syntax Fixed) running on 8081...~n', []).
 
 :- http_handler(root(action), handle_hunter_request, []).
 
+% ----------------------------------------------------------------------
+% 1. GESTION DU PREFLIGHT (OPTIONS)
+% ----------------------------------------------------------------------
 handle_hunter_request(Request) :-
     option(method(options), Request), !,
-    cors_enable(Request, [methods([put])]),
+    cors_enable(Request, [
+        methods([get, post, put, options]),
+        headers(['Content-Type'])
+    ]),
     format('Content-type: text/plain\r\n\r\n').
 
+% ----------------------------------------------------------------------
+% 2. GESTION DE LA REQUÊTE PRINCIPALE (PUT)
+% ----------------------------------------------------------------------
 handle_hunter_request(Request) :-
+    cors_enable(Request, [methods([put])]),
+    
     http_read_json_dict(Request, RequestJSON, [value_string_as(atom), tag('')]),
-    _{ beliefs: BeliefsDict, percepts: RawPercepts } :< RequestJSON,
+    
+    ( _{ beliefs: BeliefsDict, percepts: RawPercepts } :< RequestJSON
+    -> true 
+    ;  BeliefsDict = _{}, RawPercepts = [] 
+    ),
+    
     (is_list(RawPercepts) -> Percepts = RawPercepts ; Percepts = []),
 
-    format(user_error, '~n---------------------------------------------------~n', []),
+    % --- Suite de votre logique (Cerveau) ---
     
-    ( catch(extract_state(BeliefsDict, CurrentState), _, fail)
-    -> true 
-    ;  CurrentState = [at(1,1), facing(north)], format(user_error, '[WARN] Extraction fail~n', [])
-    ),
-    format(user_error, '[STATE] ~w~n', [CurrentState]),
+    % A. Extraction (CORRIGÉE : Plus de Pos.x ici)
+    extract_pos_dir(BeliefsDict, X, Y, Dir, Visited),
+    format(user_error, '~n[ETAT] Position: (~w,~w) Face: ~w~n', [X, Y, Dir]),
 
-    ( catch(prob(choose_action_prob(CurrentState, Percepts, A, NS), Prob), Error, true)
-    -> 
-        ( var(Error) ->
-            Action = A, NewState = NS,
-            format(user_error, '[DECISION] Action: ~w (P=~2f)~n', [Action, Prob]),
-            format(atom(DebugMsg), 'Act: ~w', [Action])
-        ;
-            format(user_error, '[CRASH PITA] ~w~n', [Error]),
-            Action = move, NewState = CurrentState, DebugMsg = 'Crash'
-        )
+    % B. Identification Cible
+    get_front_cell(X, Y, Dir, FrontX, FrontY),
+
+    % C. Preuves
+    build_evidence(X, Y, Percepts, Visited, Evidence),
+
+    % D. Décision
+    ( member(glitter, Percepts) ->
+        Action = grab, DebugMsg = 'GOLD!'
     ;
-        format(user_error, '[FAIL] Force Right.~n', []),
-        Action = right, NewState = CurrentState, DebugMsg = 'Stuck'
+        Query = safe(FrontX, FrontY),
+        ( catch(prob(Query, Evidence, ProbSafe), _, fail) -> true ; ProbSafe = 0.0 ),
+        
+        format(user_error, '[ANALYSE] Devant (~w,~w) Surete: ~2f~n', [FrontX, FrontY, ProbSafe]),
+
+        ( ProbSafe > 0.7 ->
+            Action = move, format(atom(DebugMsg), 'Move P=~2f', [ProbSafe])
+        ;
+            Action = right, format(atom(DebugMsg), 'Turn P=~2f', [ProbSafe])
+        )
     ),
 
-    update_fluents_dict(BeliefsDict, NewState, UpdatedBeliefsDict),
+    format(user_error, '[DECISION] ~w~n', [Action]),
+
+    % E. Réponse
     Response = _{
-        hunterState: _{ beliefs: UpdatedBeliefsDict, percepts: Percepts },
+        hunterState: _{ beliefs: BeliefsDict, percepts: Percepts },
         action: Action,
         debug: DebugMsg
     },
-    cors_enable,
+    
     reply_json_dict(Response).
 
 
-% --- MOTEUR PHYSIQUE (CLP) ---
-
-physics_move(State, NewState) :-
-    member(at(X,Y), State),
-    member(facing(Dir), State),
-    delta(Dir, DX, DY),
-    NextX #= X + DX,
-    NextY #= Y + DY,
-    
-    % On limite à 0..3 (taille standard 4x4) pour éviter de croire qu'on peut sortir
-    % Si votre grille est plus grande, augmentez à 0..5 ou 0..10
-    NextX in 0..3, NextY in 0..3, 
-    label([NextX, NextY]),
-    select(at(X,Y), State, at(NextX, NextY), NewState).
-
-physics_turn_right(State, NewState) :-
-    member(facing(Dir), State), next_dir_right(Dir, NewDir),
-    select(facing(Dir), State, facing(NewDir), NewState).
-
-physics_turn_left(State, NewState) :-
-    member(facing(Dir), State), next_dir_left(Dir, NewDir),
-    select(facing(Dir), State, facing(NewDir), NewState).
-
-delta(north, 0, 1).   delta(south, 0, -1).
-delta(east, 1, 0).    delta(west, -1, 0).
-next_dir_right(north, east). next_dir_right(east, south).
-next_dir_right(south, west). next_dir_right(west, north).
-next_dir_left(north, west).  next_dir_left(west, south).
-next_dir_left(south, east).  next_dir_left(east, north).
-
-
-% --- EXTRACTION ---
-
-extract_state(BeliefsDict, State) :-
-    Fluents = BeliefsDict.certain_fluents,
-    get_dict(fat_hunter, Fluents, H), get_dict(c, H, Pos),
-    safe_number(Pos.x, X), safe_number(Pos.y, Y),
-    ( get_dict(dir, Fluents, DirList), member(DObj, DirList), get_dict(d, DObj, DirAtom) -> Dir = DirAtom ; Dir = north ),
-    BaseState = [at(X,Y), facing(Dir)],
-
-    ( get_dict(safeCells, BeliefsDict, SafeJSON) -> maplist(json_to_term(safe), SafeJSON, SafeTerms) ; SafeTerms = [] ),
-    ( get_dict(pitCells, BeliefsDict, PitJSON) -> maplist(json_to_term(pit), PitJSON, PitTerms) ; PitTerms = [] ),
-    ( get_dict(wumpusCells, BeliefsDict, WumpJSON) -> maplist(json_to_term(wumpus), WumpJSON, WumpTerms) ; WumpTerms = [] ),
-    % Ajout des cases visitées pour l'IA
-    ( get_dict(visited, Fluents, VisJSON) -> maplist(extract_visited, VisJSON, VisTerms) ; VisTerms = [] ),
-    
-    append(BaseState, SafeTerms, S1), append(S1, PitTerms, S2), append(S2, WumpTerms, S3), append(S3, VisTerms, State).
-
-safe_number(Val, Num) :- number(Val), !, Num = Val.
-safe_number(Atom, Num) :- atom(Atom), atom_number(Atom, Num).
-
-json_to_term(Functor, PointDict, Term) :-
-    safe_number(PointDict.x, X), safe_number(PointDict.y, Y), Term =.. [Functor, X, Y].
-
-extract_visited(Obj, visited(X,Y)) :-
-    get_dict(to, Obj, To), safe_number(To.x, X), safe_number(To.y, Y).
-
-update_fluents_dict(BeliefsDict, NewState, NewBeliefsDict) :-
-    ( member(at(NX, NY), NewState), member(facing(NDir), NewState)
-    -> 
-       Fluents = BeliefsDict.certain_fluents,
-       NewPos = c{x:NX, y:NY},
-       (get_dict(fat_hunter, Fluents, OldH) -> put_dict(c, OldH, NewPos, NewH) ; NewH = fat{c:NewPos}),
-       put_dict(fat_hunter, Fluents, NewH, F1),
-       NewDirObj = d{d:NDir, h:hunter{id:hunter}},
-       put_dict(dir, F1, [NewDirObj], F2),
-       put_dict(certain_fluents, BeliefsDict, F2, NewBeliefsDict)
-    ;  NewBeliefsDict = BeliefsDict ).
-
-
-% --- CERVEAU (RÈGLES DE DÉCISION) ---
+% --- 3. MODÈLE PROBABILISTE (LPAD) ---
 
 :- begin_lpad.
 
-% 1. PRIORITÉ ABSOLUE : OR
-choose_action_prob(State, Percepts, grab, State) :-
-    member(glitter, Percepts).
+% A. Priors
+pit(X,Y):0.2 :- valid_grid(X,Y), \+ start_pos(X,Y).
+wumpus(X,Y):0.07 :- valid_grid(X,Y), \+ start_pos(X,Y).
 
-% 2. PRIORITÉ : MUR (BUMP)
-% Si on a tapé un mur, on tourne (sinon on reste bloqué)
-choose_action_prob(State, Percepts, right, NewState) :-
-    member(bump, Percepts),
-    call(physics_turn_right(State, NewState)).
+% B. Causalité
+breeze(X,Y) :- neighbor(X,Y, NX,NY), pit(NX,NY).
+stench(X,Y) :- neighbor(X,Y, NX,NY), wumpus(NX,NY).
 
-% 3. EXPLORATION (MOVE)
+% C. Définitions
+safe(X,Y) :- \+ pit(X,Y), \+ wumpus(X,Y).
 
-% CAS A : Aucun danger ressenti ICI (Pas de Breeze, Pas de Stench)
-% => On peut avancer vers n'importe quelle case valide de la grille !
-choose_action_prob(State, Percepts, move, NewState) :-
-    \+ member(breeze, Percepts),
-    \+ member(stench, Percepts),
-    call(physics_move(State, NewState)),
-    % OPTIONNEL : On préfère ne pas revenir sur nos pas (décommenter si besoin)
-    % member(at(NX, NY), NewState), \+ member(visited(NX, NY), State).
-    true.
+start_pos(1,1).
+valid_grid(X,Y) :- member(X, [0,1,2,3,4,5]), member(Y, [0,1,2,3,4,5]).
 
-% CAS B : Danger ressenti, mais destination CONNUE SAFE
-choose_action_prob(State, _Percepts, move, NewState) :-
-    call(physics_move(State, NewState)),
-    member(at(NextX, NextY), NewState),
-    member(safe(NextX, NextY), State).
-
-% 4. DÉBLOCAGE (ROTATION)
-% Si on ne peut pas avancer (Mur ou Danger devant), on tourne pour chercher une autre voie.
-
-% Essayer Droite
-choose_action_prob(State, _Percepts, right, NewState) :-
-    call(physics_turn_right(State, NewState)).
-
-% Essayer Gauche
-choose_action_prob(State, _Percepts, left, NewState) :-
-    call(physics_turn_left(State, NewState)).
+neighbor(X,Y, NX,NY) :-
+    valid_grid(X,Y),
+    ( NX is X+1, NY is Y
+    ; NX is X-1, NY is Y
+    ; NX is X,   NY is Y+1
+    ; NX is X,   NY is Y-1
+    ),
+    valid_grid(NX,NY).
 
 :- end_lpad.
+
+
+% --- 4. UTILITAIRES ---
+
+get_front_cell(X, Y, north, X, NY) :- NY is Y + 1.
+get_front_cell(X, Y, south, X, NY) :- NY is Y - 1.
+get_front_cell(X, Y, east, NX, Y)  :- NX is X + 1.
+get_front_cell(X, Y, west, NX, Y)  :- NX is X - 1.
+
+build_evidence(X, Y, Percepts, VisitedList, Evidence) :-
+    ( member(breeze, Percepts) -> BFact = breeze(X,Y) ; BFact = \+ breeze(X,Y) ),
+    ( member(stench, Percepts) -> SFact = stench(X,Y) ; SFact = \+ stench(X,Y) ),
+    findall(\+ pit(VX, VY), member([VX, VY], VisitedList), PitFacts),
+    findall(\+ wumpus(Wx, Wy), member([Wx, Wy], VisitedList), WumpusFacts),
+    append([BFact, SFact | PitFacts], WumpusFacts, Evidence).
+
+
+% --- 5. EXTRACTION JSON (CORRIGÉE) ---
+
+extract_pos_dir(BeliefsDict, X, Y, Dir, Visited) :-
+    F = BeliefsDict.certain_fluents,
+    
+    % Position (Correction: on utilise get_dict au lieu de Pos.x)
+    get_dict(fat_hunter, F, H), 
+    get_dict(c, H, Pos),
+    get_dict(x, Pos, Px), safe_num(Px, X), 
+    get_dict(y, Pos, Py), safe_num(Py, Y),
+    
+    % Direction
+    ( get_dict(dir, F, DL), member(D, DL), get_dict(d, D, DirAtom)
