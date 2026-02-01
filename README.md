@@ -25,7 +25,7 @@ See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-
 ---
 # Faire fonctionner le hunter
 
-3 fichiers à run dans 3 terminals différents
+3 fichiers à run dans 3 terminaux différents
  ```bash
 npx quasar dev
 ```
