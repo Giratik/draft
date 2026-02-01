@@ -1,75 +1,118 @@
 #!/usr/bin/env swipl
 
+:- module(hunter_server, [run_hunter/0]).
+
+% ==============================================================================
+% 1. IMPORTATION DES MODULES
+% ==============================================================================
 :- use_module(library(http/http_server)).
 :- use_module(library(http/http_json)).
 :- use_module(library(http/http_cors)).
 :- use_module(library(http/http_log)).
+:- use_module(library(clpfd)). % ARITHMÉTIQUE DÉCLARATIVE (OBLIGATOIRE HW2)
+:- use_module(library(pita)).  % RAISONNEMENT PROBABILISTE
 
-% AJOUTER CETTE LIGNE :
-:- use_module(ontology).
+% ==============================================================================
+% 2. CONFIGURATION PITA (Section Probabiliste)
+% ==============================================================================
+:- pita.
+:- begin_lpad.
 
-% Configuration du serveur
+start_pos(1,1).
+valid_grid(X,Y) :- member(X, [0,1,2,3,4,5]), member(Y, [0,1,2,3,4,5]).
+
+% A. Priors (Probabilités de world.pl)
+pit(X,Y):0.2 :- valid_grid(X,Y), \+ start_pos(X,Y).
+wumpus(X,Y):0.07 :- valid_grid(X,Y), \+ start_pos(X,Y).
+
+% --- Règles de Causalité (Si Trou -> Brise) ---
+breeze(X, Y) :- 
+    adjacent(X, Y, NX, NY), 
+    pit(NX, NY).
+
+stench(X, Y) :- 
+    adjacent(X, Y, NX, NY), 
+    wumpus(NX, NY).
+
+% --- Adjacence Déclarative avec CLP(FD) ---
+adjacent(X, Y, NX, NY) :- NX #= X,     NY #= Y + 1.
+adjacent(X, Y, NX, NY) :- NX #= X,     NY #= Y - 1.
+adjacent(X, Y, NX, NY) :- NX #= X + 1, NY #= Y.
+adjacent(X, Y, NX, NY) :- NX #= X - 1, NY #= Y.
+
+:- end_lpad.
+
+% ==============================================================================
+% 3. CONFIGURATION DU SERVEUR
+% ==============================================================================
 :- set_setting(http:logfile, 'httpd_hunter.log').
 :- set_setting(http:cors, [*]).
 
-% Activation CORS (indispensable pour que le navigateur accepte la réponse)
-:- cors_enable.
-
-% Point d'entrée pour lancer le serveur sur le port 8081 (comme demandé par le store.ts)
+% Point d'entrée pour lancer le serveur sur le port 8081
 run_hunter :-
-    http_server(http_dispatch, [port(8081)]).
+    catch(http_stop_server(8081, []), _, true), % Stop si déjà lancé
+    http_server(http_dispatch, [port(8081)]),
+    format(user_error, '~N~n[SERVER] Hunter Agent running on port 8081 (PITA + CLP(FD))...~n', []).
 
-% Définition de la route /action
+% Définition de la route
 :- http_handler(root(action), handle_hunter_request, []).
 
-% ----------------------------------------------------------------------
-% Gestion des requêtes OPTIONS (pre-flight check pour CORS)
-% ----------------------------------------------------------------------
+% ==============================================================================
+% 4. GESTIONNAIRE DE REQUÊTE (Cerveau de l'Agent)
+% ==============================================================================
+
+% Gestion des requêtes OPTIONS (CORS pre-flight)
 handle_hunter_request(Request) :-
     option(method(options), Request), !,
     cors_enable(Request, [methods([put])]),
-    format('Content-type: text/plain\r\n'),
-    format('~n').
+    format('Content-type: text/plain\r\n\r\n').
 
-% ----------------------------------------------------------------------
-% Gestion de la requête PUT /action
-% ----------------------------------------------------------------------
+% Gestion des requêtes PUT (Action demandée)
 handle_hunter_request(Request) :-
-    % 1. Lire le JSON en toute sécurité
-    http_read_json_dict(Request, RequestJSON, [value_string_as(atom), tag('')]),
-    
-    % 2. Nettoyer les données (extraire beliefs et percepts)
-    untag(RequestJSON.get(beliefs, _{}), Beliefs),
-    untag(RequestJSON.get(percepts, []), Percepts),
-    
-    % 3. Extraction sécurisée des coordonnées et de la direction
-    % On utilise .get/3 pour fournir des valeurs par défaut ('?') si la clé n'existe pas
-    Fluents  = Beliefs.get(certain_fluents, _{}),
-    Hunter   = Fluents.get(fat_hunter, _{c:_{x:'?', y:'?'}}),
-    Coord    = Hunter.get(c, _{x:'?', y:'?'}),
-    PosX     = Coord.get(x, '?'),
-    PosY     = Coord.get(y, '?'),
-    
-    % Extraction de la direction dans la liste
-    (   get_dict(dir, Fluents, DirList),
-        member(dir{d:D, h:hunter{id:hunter}}, DirList)
-    ->  Direction = D
-    ;   Direction = 'inconnue'
+    % A. Lecture sécurisée du JSON
+    cors_enable,
+    catch(
+        http_read_json_dict(Request, RequestJSON, [value_string_as(atom), tag('')]),
+        Error,
+        (format(user_error, '[ERREUR] JSON invalide: ~w~n', [Error]), fail)
     ),
 
-    % 4. AFFICHAGE ORDONNÉ ET LISIBLE
-    format('~N~n==============================================~n'),
-    format('          REQUÊTE ACTION DU HUNTER            ~n'),
-    format('----------------------------------------------~n'),
-    format('  [POSITION]  X : ~w, Y : ~w~n', [PosX, PosY]),
-    format('  [DIRECTION] ~w~n', [Direction]),
-    format('  [PERCEPTS]  ~w~n', [Percepts]),
-    format('==============================================~n~n'),
+    % B. Extraction des Données (Beliefs & Percepts)
+    % On utilise untag pour nettoyer les structures Prolog/JSON
+    untag(RequestJSON, CleanJSON),
+    Beliefs  = CleanJSON.get(beliefs, _{}),
+    Percepts = CleanJSON.get(percepts, []),
+    Fluents  = Beliefs.get(certain_fluents, _{}),
+    
+    % C. Récupération de la Position avec CLP(FD)
+    % On récupère 'fat_hunter.c' (coordinates)
+    HunterStruct = Fluents.get(fat_hunter, _{}),
+    HunterCoord  = HunterStruct.get(c, _{}),
+    
+    % Utilisation de valeurs par défaut si le JSON est incomplet (ex: début de partie)
+    RawX = HunterCoord.get(x, 1),
+    RawY = HunterCoord.get(y, 1),
+    
+    % Contrainte CLP(FD) : X et Y sont des entiers
+    X #= RawX,
+    Y #= RawY,
 
-    % 5. Réponse par défaut
-    Action = move,
+    % D. LOGS ORDONNÉS (Sortie Terminal)
+    format(user_error, '~N~n================================================~n', []),
+    format(user_error, '          [HUNTER ACTION REQUEST]               ~n', []),
+    format(user_error, '------------------------------------------------~n', []),
+    format(user_error, '  POSITION (CLP)    : X=~w, Y=~w~n', [X, Y]),
+    format(user_error, '  PERCEPTS          : ~w~n', [Percepts]),
+    format(user_error, '================================================~n', []),
+
+    % E. DÉCISION (Appel à la logique de l'agent)
+    decide_action(Beliefs, Percepts, Action),
+    
+    % F. MISE À JOUR DES CROYANCES
+    % Pour l'instant, on renvoie les croyances telles quelles (ou mises à jour si besoin)
     NewBeliefs = Beliefs,
 
+    % G. ENVOI DE LA RÉPONSE
     Response = _{
         hunterState: _{
             beliefs: NewBeliefs,
@@ -77,59 +120,25 @@ handle_hunter_request(Request) :-
         },
         action: Action
     },
-
-    cors_enable,
     reply_json_dict(Response).
 
-% ======================================================================
-% LOGIQUE DU HUNTER (Cerveau mis à jour pour ontology.pl)
-% ======================================================================
+% ==============================================================================
+% 5. LOGIQUE DE DÉCISION (Règles Métier)
+% ==============================================================================
 
-% Cas 1 : Si ça brille (glitter), on RAMASSE l'or !
-run_agent_turn(Beliefs, Percepts, NewBeliefs, grab) :-
+% Règle 1 : Si on voit de l'or (glitter), on le ramasse !
+decide_action(_Beliefs, Percepts, grab) :-
     member(glitter, Percepts),
-    !,
-    http_log('PERCEPT: Glitter! Action: GRAB~n', []),
-    % On laisse ontology.pl gérer les effets du grab dans le cas général, 
-    % mais ici on renvoie juste l'action au frontend.
-    NewBeliefs = Beliefs.
+    format(user_error, '  -> DECISION: GRAB (J\'ai vu de l\'or!)~n', []), !.
 
-% Cas 2 : Si on s'est cogné (bump), on TOURNE (pour se débloquer)
-run_agent_turn(Beliefs, Percepts, NewBeliefs, left) :-
-    member(bump, Percepts),
-    !,
-    http_log('PERCEPT: Bump! Action: LEFT~n', []),
-    NewBeliefs = Beliefs.
+% Règle 2 : Sinon, on avance (Action par défaut)
+decide_action(_Beliefs, _Percepts, move) :-
+    format(user_error, '  -> DECISION: MOVE~n', []).
 
-% Cas 3 : Comportement par défaut -> AVANCER (Action: move)
-run_agent_turn(Beliefs, _Percepts, NewBeliefs, move) :-
-    % 1. Récupérer les Fluents et Eternals (déjà nettoyés par untag/2)
-    Fluents = Beliefs.certain_fluents,
-    Eternals = Beliefs.certain_eternals,
-
-    % 2. Affichage de la position et de la direction pour le debug
-    (   Hunter = Fluents.fat_hunter,
-        DirList = Fluents.dir,
-        member(dir{d:D, h:hunter{id:hunter}}, DirList)
-    ->  http_log('POSITION ACTUELLE : X=~w, Y=~w | DIRECTION: ~w~n', 
-                 [Hunter.c.x, Hunter.c.y, D])
-    ;   http_log('Erreur : Impossible de lire la position ou la direction dans les Fluents~n', [])
-    ),
-
-    % 3. Utiliser l'ontologie pour calculer l'effet réel du mouvement
-    % Cela va utiliser vos règles effects(Eternals, Fluents, move, ResultingFluents)
-    (   catch(effects(Eternals, Fluents, move, NewFluents), Error, 
-              (http_log('Erreur ontology: ~w~n', [Error]), fail))
-    ->  http_log('Ontology a calculé le mouvement avec succès.~n', []),
-        NewBeliefs = Beliefs.put(certain_fluents, NewFluents)
-    ;   http_log('ECHEC : L\'ontologie n\'a pas pu calculer le mouvement (mur ou erreur).~n', []),
-        NewBeliefs = Beliefs
-    ),
-    http_log('Action envoyée: MOVE~n', []).
-
-% ----------------------------------------------------------------------
-% Utilitaires (copiés de server.pl pour nettoyer les dicts)
-% ----------------------------------------------------------------------
+% ==============================================================================
+% 6. UTILITAIRES JSON
+% ==============================================================================
+% Nettoie les dictionnaires SWI-Prolog des tags inutiles
 untag(DictIn, DictOut) :-
     is_dict(DictIn), !,
     dict_pairs(DictIn, _, Pairs),

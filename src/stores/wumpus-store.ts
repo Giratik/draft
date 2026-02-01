@@ -109,10 +109,24 @@ export const useWumpusStore = defineStore('wumpus', {
       })
         .then((response) => response.json())
         .then((json) => {
+          //this.previousFluents = this.worldState.fluents;
+          //this.worldState.fluents = json.fluents;
+          //this.percepts = json.percepts;
+          //this.hunterState.percepts = this.percepts;
           this.previousFluents = this.worldState.fluents;
+          
+          // 1. Mise à jour de l'état du monde (Ce qui met à jour le Sim log)
           this.worldState.fluents = json.fluents;
           this.percepts = json.percepts;
+
+          // 2. Mise à jour des percepts du Hunter
           this.hunterState.percepts = this.percepts;
+
+          // --- AJOUTER CE BLOC POUR CORRIGER LE HUNTER ---
+          // On force la mise à jour des croyances du hunter avec la nouvelle position réelle
+          if (this.hunterState.beliefs) {
+             this.hunterState.beliefs.certain_fluents = this.worldState.fluents;
+          }
 
           // Helper function
           const addUniqueCell = (list: Position[], cell: Position) => {
