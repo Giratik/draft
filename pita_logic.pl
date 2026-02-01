@@ -1,120 +1,208 @@
-:- module(logic, [run_hunter/0]).
+#!/usr/bin/env swipl
 
-% --- IMPORTS ---
+:- module(hunter_server, [run_hunter/0]).
+
+% ==============================================================================
+% 1. IMPORTATION DES MODULES
+% ==============================================================================
 :- use_module(library(http/http_server)).
 :- use_module(library(http/http_json)).
 :- use_module(library(http/http_cors)).
-:- use_module(library(clpfd)).
+:- use_module(library(http/http_log)).
+:- use_module(library(clpfd)). 
 :- use_module(library(pita)).
 
+% ==============================================================================
+% 2. CONFIGURATION PITA (Modèle Probabiliste)
+% ==============================================================================
 :- pita.
+:- begin_lpad.
 
-% CONFIGURATION CORS (Identique à agent_logic.pl)
+% --- Monde ---
+valid_grid(X,Y) :- member(X, [0,1,2,3,4,5]), member(Y, [0,1,2,3,4,5]).
+start_pos(1,1).
+
+% --- Priors ---
+pit(X,Y):0.2     :- valid_grid(X,Y), \+ start_pos(X,Y).
+wumpus(X,Y):0.05 :- valid_grid(X,Y), \+ start_pos(X,Y).
+
+% --- Causalité ---
+breeze(X, Y) :- adjacent(X, Y, NX, NY), pit(NX, NY).
+stench(X, Y) :- adjacent(X, Y, NX, NY), wumpus(NX, NY).
+
+% --- Sécurité ---
+safe(X,Y) :- \+ pit(X,Y), \+ wumpus(X,Y).
+
+% --- Adjacence ---
+adjacent(X, Y, NX, NY) :- valid_grid(NX, NY), NX #= X,     NY #= Y + 1.
+adjacent(X, Y, NX, NY) :- valid_grid(NX, NY), NX #= X,     NY #= Y - 1.
+adjacent(X, Y, NX, NY) :- valid_grid(NX, NY), NX #= X + 1, NY #= Y.
+adjacent(X, Y, NX, NY) :- valid_grid(NX, NY), NX #= X - 1, NY #= Y.
+
+:- end_lpad.
+
+% ==============================================================================
+% 3. SERVEUR HTTP
+% ==============================================================================
+:- set_setting(http:logfile, 'httpd_hunter.log').
 :- set_setting(http:cors, [*]).
-:- cors_enable.
-
-% --- SERVEUR ---
 
 run_hunter :-
+    catch(http_stop_server(8081, []), _, true),
     http_server(http_dispatch, [port(8081)]),
-    format(user_error, '~n[SERVER] Hunter (PITA Brain) running on 8081...~n', []).
+    format(user_error, '~N~n[SERVER] Hunter Agent (Smart Explorer) running on 8081...~n', []).
 
 :- http_handler(root(action), handle_hunter_request, []).
 
-% ----------------------------------------------------------------------
-% 1. GESTION PREFLIGHT (OPTIONS)
-% Copié strictement depuis agent_logic.pl qui fonctionne
-% ----------------------------------------------------------------------
 handle_hunter_request(Request) :-
     option(method(options), Request), !,
     cors_enable(Request, [methods([put])]),
     format('Content-type: text/plain\r\n\r\n').
 
-% ----------------------------------------------------------------------
-% 2. GESTION REQUÊTE (PUT)
-% ----------------------------------------------------------------------
 handle_hunter_request(Request) :-
-    http_read_json_dict(Request, RequestJSON, [value_string_as(atom), tag('')]),
-    _{ beliefs: BeliefsDict, percepts: RawPercepts } :< RequestJSON,
-    (is_list(RawPercepts) -> Percepts = RawPercepts ; Percepts = []),
+    cors_enable,
+    catch(
+        http_read_json_dict(Request, RequestJSON, [value_string_as(atom), tag('')]),
+        Error,
+        (format(user_error, '[ERREUR] JSON invalide: ~w~n', [Error]), fail)
+    ),
 
-    format(user_error, '~n================ DECISION CYCLE ================~n', []),
-    format(user_error, '[IN] Percepts: ~w~n', [Percepts]),
+    untag(RequestJSON, CleanJSON),
+    Beliefs  = CleanJSON.get(beliefs, _{}),
+    Percepts = CleanJSON.get(percepts, []),
     
-    ( catch(extract_state(BeliefsDict, CurrentState), _, fail)
-    -> true 
-    ;  CurrentState = [at(1,1), facing(north)], format(user_error, '[WARN] Extraction State Failed! Using fallback.~n', [])
-    ),
-    format(user_error, '[IN] State: ~w~n', [CurrentState]),
+    extract_state(Beliefs, X, Y, Dir, Visited),
 
-    ( catch(prob(choose_action_safe(CurrentState, Percepts, A), Prob), Error, true)
-    -> 
-        ( var(Error) ->
-            Action = A,
-            format(user_error, '[OUT] DECISION: ~w (P=~2f)~n', [Action, Prob])
-        ;
-            format(user_error, '[CRASH] PITA Error: ~w~n', [Error]),
-            Action = move
-        )
-    ;
-        format(user_error, '[FAIL] No rule applied! Forcing RIGHT.~n', []),
-        Action = right
-    ),
+    format(user_error, '~N~n================================================~n', []),
+    format(user_error, '          [HUNTER ACTION REQUEST]               ~n', []),
+    format(user_error, '------------------------------------------------~n', []),
+    format(user_error, '  POS: ~w,~w (~w)~n', [X, Y, Dir]),
+    format(user_error, '  PERCEPTS: ~w~n', [Percepts]),
+    format(user_error, '================================================~n', []),
 
+    decide_action(X, Y, Dir, Visited, Percepts, Action),
+    
     Response = _{
-        hunterState: _{ beliefs: BeliefsDict, percepts: Percepts },
+        hunterState: _{ beliefs: Beliefs, percepts: Percepts },
         action: Action
     },
-    cors_enable,
     reply_json_dict(Response).
 
 
-% --- MOTEUR PROBABILISTE (LPAD) ---
+% ==============================================================================
+% 4. CERVEAU (Stratégie d'Exploration)
+% ==============================================================================
 
-:- begin_lpad.
+% Règle 1: OR -> GRAB
+decide_action(_, _, _, _, Percepts, grab) :-
+    member(glitter, Percepts),
+    format(user_error, '  -> DECISION: GRAB (Or!)~n', []), !.
 
-% A. Priors (Probabilités de world.pl)
-pit(X,Y):0.2 :- valid_grid(X,Y), \+ start_pos(X,Y).
-wumpus(X,Y):0.07 :- valid_grid(X,Y), \+ start_pos(X,Y).
+% Règle 2: MUR -> RIGHT
+decide_action(_, _, _, _, Percepts, right) :-
+    member(bump, Percepts),
+    format(user_error, '  -> DECISION: RIGHT (Mur)~n', []), !.
 
-% B. Causalité
-breeze(X,Y) :- neighbor(X,Y, NX,NY), pit(NX,NY).
-stench(X,Y) :- neighbor(X,Y, NX,NY), wumpus(NX,NY).
+% Règle 3: Comparaison des options (Devant vs Droite)
+decide_action(X, Y, Dir, Visited, Percepts, Action) :-
+    % A. Construire les preuves PITA
+    build_evidence(X, Y, Percepts, Visited, EvidenceConj),
+    
+    % B. Evaluer le score de la case DEVANT
+    get_front_cell(X, Y, Dir, FrontX, FrontY),
+    evaluate_cell(FrontX, FrontY, EvidenceConj, Visited, ScoreFront),
+    
+    % C. Evaluer le score de la case à DROITE (Simulation de rotation)
+    next_dir_right(Dir, RightDir),
+    get_front_cell(X, Y, RightDir, RightX, RightY),
+    evaluate_cell(RightX, RightY, EvidenceConj, Visited, ScoreRight),
+    
+    format(user_error, '  [SCORES] Front(~w,~w)=~w | Right(~w,~w)=~w~n', 
+           [FrontX, FrontY, ScoreFront, RightX, RightY, ScoreRight]),
 
-% C. Définitions
-safe(X,Y) :- \+ pit(X,Y), \+ wumpus(X,Y).
+    % D. Prise de décision
+    ( ScoreRight > ScoreFront ->
+        Action = right,
+        format(user_error, '  -> DECISION: RIGHT (Meilleure opportunité à droite)~n', [])
+    ; ScoreFront > 0 ->
+        Action = move,
+        format(user_error, '  -> DECISION: MOVE (Devant est acceptable)~n', [])
+    ;
+        Action = right,
+        format(user_error, '  -> DECISION: RIGHT (Cul-de-sac ou Danger devant)~n', [])
+    ).
 
-start_pos(1,1).
-valid_grid(X,Y) :- member(X, [0,1,2,3,4,5]), member(Y, [0,1,2,3,4,5]).
 
-neighbor(X,Y, NX,NY) :-
-    valid_grid(X,Y),
-    (NX is X+1, NY is Y ; NX is X-1, NY is Y ; NX is X, NY is Y+1 ; NX is X, NY is Y-1),
-    valid_grid(NX,NY).
+% ==============================================================================
+% 5. EVALUATION (PITA + Heuristique)
+% ==============================================================================
 
-:- end_lpad.
+% evaluate_cell(+X, +Y, +Evidence, +Visited, -Score)
+% Score 2 : Safe + Non visité (Priorité max)
+% Score 1 : Safe + Déjà visité (Repli)
+% Score 0 : Danger ou Mur (Interdit)
+
+evaluate_cell(X, Y, _, _, 0) :-
+    \+ is_valid_coordinate(X, Y), !. % Mur
+
+evaluate_cell(X, Y, Evidence, Visited, Score) :-
+    % 1. Calcul Probabiliste P(Safe)
+    ( prob((safe(X, Y), Evidence), P_Joint),
+      prob(Evidence, P_Ev),
+      P_Ev > 0.000001
+    ->
+        P is P_Joint / P_Ev
+    ;
+        P = 0.5 % Incertitude
+    ),
+    
+    ( P > 0.8 -> % Seuil de confiance 80%
+        % La case est sûre, vérifions si elle est visitée
+        ( member([X, Y], Visited) ->
+             Score = 1 % Déjà vu (Ennuyeux mais safe)
+        ;
+             Score = 2 % Nouveau ! (Exploration)
+        )
+    ;
+        Score = 0 % Trop dangereux
+    ).
 
 
-% --- UTILITAIRES ---
+% ==============================================================================
+% 6. UTILITAIRES
+% ==============================================================================
 
-get_front_cell(X, Y, north, X, NY) :- NY is Y + 1.
-get_front_cell(X, Y, south, X, NY) :- NY is Y - 1.
-get_front_cell(X, Y, east, NX, Y)  :- NX is X + 1.
-get_front_cell(X, Y, west, NX, Y)  :- NX is X - 1.
+extract_state(Beliefs, X, Y, Dir, VisitedCoordinates) :-
+    Fluents = Beliefs.get(certain_fluents, _{}),
+    H = Fluents.get(fat_hunter, _{}), C = H.get(c, _{}),
+    RawX = C.get(x, 1), RawY = C.get(y, 1),
+    X #= RawX, Y #= RawY,
+    ( get_dict(dir, Fluents, DL), member(dir{d:D, h:_}, DL) -> Dir = D ; Dir = north ),
+    ( get_dict(visited, Fluents, VL) -> 
+        findall([VX, VY], (member(VObj, VL), get_dict(to, VObj, VTo), VX = VTo.x, VY = VTo.y), VisitedCoordinates)
+    ; VisitedCoordinates = [] ).
 
-build_evidence(X, Y, Percepts, VisitedList, Evidence) :-
-    ( member(breeze, Percepts) -> BFact = breeze(X,Y) ; BFact = \+ breeze(X,Y) ),
-    ( member(stench, Percepts) -> SFact = stench(X,Y) ; SFact = \+ stench(X,Y) ),
-    findall(\+ pit(VX, VY), member([VX, VY], VisitedList), PFacts),
-    findall(\+ wumpus(Wx, Wy), member([Wx, Wy], VisitedList), WFacts),
-    append([BFact, SFact | PFacts], WFacts, Evidence).
+build_evidence(X, Y, Percepts, Visited, EvidenceConj) :-
+    ( member(breeze, Percepts) -> B = breeze(X,Y) ; B = (\+ breeze(X,Y)) ),
+    ( member(stench, Percepts) -> S = stench(X,Y) ; S = (\+ stench(X,Y)) ),
+    findall(\+ pit(Vx, Vy), member([Vx, Vy], Visited), SafePits),
+    findall(\+ wumpus(Wx, Wy), member([Wx, Wy], Visited), SafeWumpus),
+    append([B, S | SafePits], SafeWumpus, EvidenceList),
+    list_to_conj(EvidenceList, EvidenceConj).
 
-extract_pos_dir(BeliefsDict, X, Y, Dir, Visited) :-
-    ( get_dict(certain_fluents, BeliefsDict, F) -> true ; F = _{} ),
-    ( get_dict(fat_hunter, F, H), get_dict(c, H, Pos), safe_num(Pos.x, X), safe_num(Pos.y, Y) -> true ; X=1, Y=1 ),
-    ( get_dict(dir, F, DL), member(D, DL), get_dict(d, D, DA) -> Dir = DA ; Dir = north ),
-    ( get_dict(visited, F, VL) -> maplist(ex_vis, VL, Visited) ; Visited = [] ).
+get_front_cell(X, Y, north, FX, FY) :- FX #= X,     FY #= Y + 1.
+get_front_cell(X, Y, south, FX, FY) :- FX #= X,     FY #= Y - 1.
+get_front_cell(X, Y, east,  FX, FY) :- FX #= X + 1, FY #= Y.
+get_front_cell(X, Y, west,  FX, FY) :- FX #= X - 1, FY #= Y.
 
-safe_num(A, N) :- atom(A), atom_number(A, N), !.
-safe_num(N, N) :- number(N).
-ex_vis(Obj, [X, Y]) :- get_dict(to, Obj, T), safe_num(T.x, X), safe_num(T.y, Y).
+next_dir_right(north, east). next_dir_right(east, south).
+next_dir_right(south, west). next_dir_right(west, north).
+
+is_valid_coordinate(X, Y) :- member(X, [0,1,2,3,4,5]), member(Y, [0,1,2,3,4,5]).
+list_to_conj([], true).
+list_to_conj([H], H) :- !.
+list_to_conj([H|T], (H, R)) :- list_to_conj(T, R).
+untag(D, DOut) :- is_dict(D), !, dict_pairs(D, _, P), maplist(untag_pair, P, NP), dict_create(DOut, _, NP).
+untag(L, LOut) :- is_list(L), !, maplist(untag, L, LOut).
+untag(V, V).
+untag_pair(K-V, K-VO) :- untag(V, VO).

@@ -1,6 +1,6 @@
 # Wumpus World Simulator (wumpus-simulator-vue)
 
-Wumpus world simulation interface for IAS4A
+mode d'emploi
 
 ## Install the dependencies
 ```bash
@@ -11,27 +11,8 @@ npm install
 
 ### Start the app in development mode (hot-code reloading, error reporting, etc.)
 ```bash
-quasar dev
+npx quasar dev
 ```
-
-
-### Lint the files
-```bash
-yarn lint
-# or
-npm run lint
-```
-
-
-### Format the files
-```bash
-yarn format
-# or
-npm run format
-```
-
-
-
 ### Build the app for production
 ```bash
 quasar build
@@ -41,28 +22,32 @@ quasar build
 See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-config-js).
 
 
-#  Création agent intelligent pour le jeu du Wumpus
-Nous avons modifié 3 fichiers pour créer un agent capable d'analyser son environnement et agir en conséquence.
+---
+# Faire fonctionner le hunter
 
-## models.ts
-Nous définissons dans ce fichier la composition du fichier json qui permet d'enregistrer les différents éléments du monde
-que va rencontrer le hunter. Nous avons ajouté au fichier initial : 
-- safeCells pour enregistrer les cases considérées sans danger
-- breezesuspectCells où sont enregistrés les cases voisines à celle sentant une brise
-- stenchsuspectCells où sont enregistrés les cases voisines à celle sentant une odeur
-- pitCells où sont enregistrés les cases qui sont à coup sûr des trous
-- wumpusCells où sont enregistrés les cases qui sont à coup sûr des Wumpus
+3 fichiers à run dans 3 terminals différents
+ ```bash
+npx quasar dev
+```
 
-## Wumpus-store.ts
-C'est dans ce fichier que la logique d'analyse du monde se trouve. Ici il y a les règles pour labelliser les cases :
-- Les cases safes : quand le hunter se déplace la case est automatiquement considérée safe puis enregistré dans le fichier json dans le tableau
-correspondant et effacé des autres le cas échéant
-- Les cases breeze et stench suspect : quand le hunter sent une brise ou une odeur les cases adjacentes qui ne sont pas safe sont mises 
-dans les tableaux suspect selon la nature du Percept
-- Les cases Pit et Wumpus : quand la brise ou l'odeur est perçu sur deux cases différentes alors cette case devient une case wumpus ou pit et les tableaux sont
-mis-à-jour
-Pour parer au problème de tourner à droite ou à gauche met-à-jour l'analyse des percept, elle n'est plus effectué lorsque on se trouve sur une case safe.
+```bash
+swipl server.pl
+# ensuite sur swipl
+?- run.
+```
 
-## server.pl
-Dans ce fichier nous avons codé la logique de notre agent pour suggérer des actions. En utilisant les informations dans le fichier json, l'agent va 
-proposer des actions.
+```bash
+swipl logic.pl
+# ensuite sur swipl
+?- run_hunter.
+```
+
+Le hunter n'a actuellement aucun désir de gagner, il cherche seulement à parcourir le plateau.
+
+# reste à faire
+- lorsque le hunter démarre à côté d'un puit, il tourne en rond => forcer le hunter à prendre un risque
+- actuellement le hunter ne sait jouer que sur un plateau 5*5 => rendre dynamique en fonction de la configuration du monde
+- le hunter n'a pas encore comme objectif de sortir lorsqu'il récupère l'or => à implémenter
+- faire en sorte de baisser la probabilité du hunter à retourner sur ces pas
+afficher les probas correctement dans le débug ?
+- vérifier si c'est pita et clpfd friendly
