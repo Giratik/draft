@@ -22,7 +22,6 @@
 
 % --- Modules ---
 :- use_module(wumpus).
-% (On n'importe pas ontology ici, c'est pour le hunter ou le simulateur interne)
 
 % --- Run HTTP Server sur le port 8080 ---
 run :-

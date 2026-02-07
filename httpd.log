@@ -1,0 +1,734 @@
+server(started, 1737030354).
+/*Thu Jan 16 13:26:52 2025*/ request(1, 1737030412.922, [peer(ip(127,0,0,1)),method(options),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),access_control_request_method('PUT'),access_control_request_headers('content-type'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(1, 0.04687500000000001, 0, 200, ok).
+/*Thu Jan 16 13:26:52 2025*/ request(2, 1737030412.986, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(16),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+completed(2, 0.125, 3110, 500, error("goal unexpectedly failed: user:handle_sim_request([protocol(http),peer(ip(127,0,0,1)),pool(client('httpd@8080',user:http_dispatch,<stream>(0000026ffaf137b0),<stream>(0000026ffaf138c0))),input(<stream>(0000026ffaf137b0)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),accept([media(_762/_764,[],1.0,[])]),accept_language('fr,fr-FR;q=0.8,en-US;q=0.5,en;q=0.3'),accept_encoding('gzip, deflate, br, zstd'),referer('http://localhost:9000/'),content_type('application/json'),content_length(16),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')])\nIn:\n  [19] throw(error(goal_failed(...),_924))\n  [18] http_dispatch:call_action(user:handle_sim_request,[protocol(http),...|...]) at c:/program files/swipl/library/ext/http/http/http_dispatch.pl:1046\n  [17] http_dispatch:call_action(user:handle_sim_request,[protocol(http),...|...],[]) at c:/program files/swipl/library/ext/http/http/http_dispatch.pl:1040\n  [16] time:run_alarm_goal('$alarm'(2679972358560),http_dispatch:call_action(...,...,[])) at c:/program files/swipl/library/ext/clib/time.pl:163\n  [15] setup_call_cleanup(time:alarm(300,...,...,...),time:run_alarm_goal(...,...),time:remove_alarm_notrace(...)) at c:/program files/swipl/boot/init.pl:682\n  [14] time:call_with_time_limit(300,http_dispatch:call_action(...,...,[]),'$no_ctx') at c:/program files/swipl/library/ext/clib/time.pl:154\n  [13] time:call_with_time_limit(300,http_dispatch:call_action(...,...,[])) at c:/program files/swipl/library/ext/clib/time.pl:149\n  [12] http_dispatch:time_limit_action(user:handle_sim_request,[protocol(http),...|...],[]) at c:/program files/swipl/library/ext/http/http/http_dispatch.pl:1022\n  [11] http_dispatch:spawn_action(user:handle_sim_request,[protocol(http),...|...],[]) at c:/program files/swipl/library/ext/http/http/http_dispatch.pl:1003\n  [10] http_dispatch:action(user:handle_sim_request,[protocol(http),...|...],[]) at c:/program files/swipl/library/ext/http/http/http_dispatch.pl:993\n   [9] http_dispatch:http_dispatch([protocol(http),...|...]) at c:/program files/swipl/library/ext/http/http/http_dispatch.pl:503\n   [8] httpd_wrapper:call_handler(user:http_dispatch,2,[protocol(http),...|...]) at c:/program files/swipl/library/ext/http/http/http_wrapper.pl:332\n   [7] catch(httpd_wrapper:call_handler(...,2,...),error(goal_failed(...),context(_1574,_1576)),httpd_wrapper:true) at c:/program files/swipl/boot/init.pl:565\n   [6] httpd_wrapper:handler_with_output_to(user:http_dispatch,2,[protocol(http),...|...],current_output,error(goal_failed(...),context(_1656,_1658))) at c:/program files/swipl/library/ext/http/http/http_wrapper.pl:311\n   [5] httpd_wrapper:handler_with_output_to(user:http_dispatch,2,[protocol(http),...|...],<stream>(0000026ffaf7e150),error(goal_failed(...),context(_1732,_1734))) at c:/program files/swipl/library/ext/http/http/http_wrapper.pl:321")).
+/*Thu Jan 16 13:26:54 2025*/ request(3, 1737030414.424, [peer(ip(127,0,0,1)),method(options),request_uri('/default'),path('/default'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),access_control_request_method('PUT'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(3, 0.0, 0, 200, ok).
+/*Thu Jan 16 13:26:54 2025*/ request(4, 1737030414.457, [peer(ip(127,0,0,1)),method(put),request_uri('/default'),path('/default'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0'),content_length(0)]).
+completed(4, 0.0, 2476, 200, ok).
+/*Thu Jan 16 13:26:57 2025*/ request(5, 1737030417.130, [peer(ip(127,0,0,1)),method(options),request_uri('/init'),path('/init'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),access_control_request_method('PUT'),access_control_request_headers('content-type'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(5, 0.0, 0, 200, ok).
+/*Thu Jan 16 13:26:57 2025*/ request(6, 1737030417.159, [peer(ip(127,0,0,1)),method(put),request_uri('/init'),path('/init'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(10),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+completed(6, 0.234375, 2267, 200, ok).
+/*Thu Jan 16 13:28:34 2025*/ request(7, 1737030514.594, [peer(ip(127,0,0,1)),method(options),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),access_control_request_method('PUT'),access_control_request_headers('content-type'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(7, 0.015625, 0, 200, ok).
+/*Thu Jan 16 13:28:34 2025*/ request(8, 1737030514.626, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(2224),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+_{ eternals: _{ cells: [ _{x:0,y:0},
+			 _{x:1,y:0},
+			 _{x:2,y:0},
+			 _{x:3,y:0},
+			 _{x:4,y:0},
+			 _{x:5,y:0},
+			 _{x:0,y:1},
+			 _{x:1,y:1},
+			 _{x:2,y:1},
+			 _{x:3,y:1},
+			 _{x:4,y:1},
+			 _{x:5,y:1},
+			 _{x:0,y:2},
+			 _{x:1,y:2},
+			 _{x:2,y:2},
+			 _{x:3,y:2},
+			 _{x:4,y:2},
+			 _{x:5,y:2},
+			 _{x:0,y:3},
+			 _{x:1,y:3},
+			 _{x:2,y:3},
+			 _{x:3,y:3},
+			 _{x:4,y:3},
+			 _{x:5,y:3},
+			 _{x:0,y:4},
+			 _{x:1,y:4},
+			 _{x:2,y:4},
+			 _{x:3,y:4},
+			 _{x:4,y:4},
+			 _{x:5,y:4},
+			 _{x:0,y:5},
+			 _{x:1,y:5},
+			 _{x:2,y:5},
+			 _{x:3,y:5},
+			 _{x:4,y:5},
+			 _{x:5,y:5}
+		       ],
+		eat_exit: _{c:_{x:1,y:1},e:_{id:exit}},
+		eat_pit: [ _{c:_{x:4,y:2},p:_{id:pit3}},
+			   _{c:_{x:1,y:2},p:_{id:pit2}},
+			   _{c:_{x:3,y:4},p:_{id:pit1}}
+			 ],
+		eat_walls: [ _{c:_{x:5,y:5},w:_{id:wall20}},
+			     _{c:_{x:4,y:5},w:_{id:wall19}},
+			     _{c:_{x:3,y:5},w:_{id:wall18}},
+			     _{c:_{x:2,y:5},w:_{id:wall17}},
+			     _{c:_{x:1,y:5},w:_{id:wall16}},
+			     _{c:_{x:0,y:5},w:_{id:wall15}},
+			     _{c:_{x:5,y:4},w:_{id:wall14}},
+			     _{c:_{x:0,y:4},w:_{id:wall13}},
+			     _{c:_{x:5,y:3},w:_{id:wall12}},
+			     _{c:_{x:0,y:3},w:_{id:wall11}},
+			     _{c:_{x:5,y:2},w:_{id:wall10}},
+			     _{c:_{x:0,y:2},w:_{id:wall9}},
+			     _{c:_{x:5,y:1},w:_{id:wall8}},
+			     _{c:_{x:0,y:1},w:_{id:wall7}},
+			     _{c:_{x:5,y:0},w:_{id:wall6}},
+			     _{c:_{x:4,y:0},w:_{id:wall5}},
+			     _{c:_{x:3,y:0},w:_{id:wall4}},
+			     _{c:_{x:2,y:0},w:_{id:wall3}},
+			     _{c:_{x:1,y:0},w:_{id:wall2}},
+			     _{c:_{x:0,y:0},w:_{id:wall1}}
+			   ],
+		eat_wumpus: [_{c:_{x:4,y:2},w:_{id:wumpus1}}]
+	      },
+   fluents: _{ alive: [_{id:hunter},_{id:wumpus1}],
+	       dir: [_{d:north,h:_{id:hunter}}],
+	       fat_gold: [_{c:_{x:4,y:3},g:_{id:gold1}}],
+	       fat_hunter: _{c:_{x:1,y:1},h:_{id:hunter}},
+	       game_state: running,
+	       has_arrow: [_{a:_{id:arrow1},h:_{id:hunter}}],
+	       has_gold: [],
+	       score: 0,
+	       visited: []
+	     },
+   plan: climb,
+   previous_fluents: _{ alive: [_{id:hunter},_{id:wumpus1}],
+			dir: [_{d:north,h:_{id:hunter}}],
+			fat_gold: [_{c:_{x:4,y:3},g:_{id:gold1}}],
+			fat_hunter: _{c:_{x:1,y:1},h:_{id:hunter}},
+			game_state: running,
+			has_arrow: [_{a:_{id:arrow1},h:_{id:hunter}}],
+			has_gold: [],
+			score: 0,
+			visited: []
+		      }
+ }
+Updating State w/ action: climbCalculating effects of climb 
+Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
+			   dir: [_{d:north,h:_{id:hunter}}],
+			   fat_gold: [_{c:_{x:4,y:3},g:_{id:gold1}}],
+			   fat_hunter: fat{ c: _{x:1,y:1},
+					    h: hunter{id:hunter}
+					  },
+			   game_state: finished,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [],
+			   score: -1,
+			   visited: []
+			 }
+Calculated Next Percepts: [breeze]completed(8, 0.17187500000000006, 425, 200, ok).
+/*Thu Jan 16 13:28:43 2025*/ request(9, 1737030523.057, [peer(ip(127,0,0,1)),method(options),request_uri('/default'),path('/default'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),access_control_request_method('PUT'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(9, 0.0, 0, 200, ok).
+/*Thu Jan 16 13:28:43 2025*/ request(10, 1737030523.087, [peer(ip(127,0,0,1)),method(put),request_uri('/default'),path('/default'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0'),content_length(0)]).
+completed(10, 0.015625000000000007, 2476, 200, ok).
+/*Thu Jan 16 13:28:50 2025*/ request(11, 1737030530.372, [peer(ip(127,0,0,1)),method(options),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),access_control_request_method('PUT'),access_control_request_headers('content-type'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(11, 0.03125, 0, 200, ok).
+/*Thu Jan 16 13:28:50 2025*/ request(12, 1737030530.403, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(2223),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+_{ eternals: _{ cells: [ _{x:0,y:0},
+			 _{x:1,y:0},
+			 _{x:2,y:0},
+			 _{x:3,y:0},
+			 _{x:4,y:0},
+			 _{x:5,y:0},
+			 _{x:0,y:1},
+			 _{x:1,y:1},
+			 _{x:2,y:1},
+			 _{x:3,y:1},
+			 _{x:4,y:1},
+			 _{x:5,y:1},
+			 _{x:0,y:2},
+			 _{x:1,y:2},
+			 _{x:2,y:2},
+			 _{x:3,y:2},
+			 _{x:4,y:2},
+			 _{x:5,y:2},
+			 _{x:0,y:3},
+			 _{x:1,y:3},
+			 _{x:2,y:3},
+			 _{x:3,y:3},
+			 _{x:4,y:3},
+			 _{x:5,y:3},
+			 _{x:0,y:4},
+			 _{x:1,y:4},
+			 _{x:2,y:4},
+			 _{x:3,y:4},
+			 _{x:4,y:4},
+			 _{x:5,y:4},
+			 _{x:0,y:5},
+			 _{x:1,y:5},
+			 _{x:2,y:5},
+			 _{x:3,y:5},
+			 _{x:4,y:5},
+			 _{x:5,y:5}
+		       ],
+		eat_exit: _{c:_{x:1,y:1},e:_{id:exit}},
+		eat_pit: [ _{c:_{x:4,y:4},p:_{id:pit3}},
+			   _{c:_{x:3,y:3},p:_{id:pit2}},
+			   _{c:_{x:3,y:1},p:_{id:pit1}}
+			 ],
+		eat_walls: [ _{c:_{x:5,y:5},w:_{id:wall20}},
+			     _{c:_{x:4,y:5},w:_{id:wall19}},
+			     _{c:_{x:3,y:5},w:_{id:wall18}},
+			     _{c:_{x:2,y:5},w:_{id:wall17}},
+			     _{c:_{x:1,y:5},w:_{id:wall16}},
+			     _{c:_{x:0,y:5},w:_{id:wall15}},
+			     _{c:_{x:5,y:4},w:_{id:wall14}},
+			     _{c:_{x:0,y:4},w:_{id:wall13}},
+			     _{c:_{x:5,y:3},w:_{id:wall12}},
+			     _{c:_{x:0,y:3},w:_{id:wall11}},
+			     _{c:_{x:5,y:2},w:_{id:wall10}},
+			     _{c:_{x:0,y:2},w:_{id:wall9}},
+			     _{c:_{x:5,y:1},w:_{id:wall8}},
+			     _{c:_{x:0,y:1},w:_{id:wall7}},
+			     _{c:_{x:5,y:0},w:_{id:wall6}},
+			     _{c:_{x:4,y:0},w:_{id:wall5}},
+			     _{c:_{x:3,y:0},w:_{id:wall4}},
+			     _{c:_{x:2,y:0},w:_{id:wall3}},
+			     _{c:_{x:1,y:0},w:_{id:wall2}},
+			     _{c:_{x:0,y:0},w:_{id:wall1}}
+			   ],
+		eat_wumpus: [_{c:_{x:1,y:3},w:_{id:wumpus1}}]
+	      },
+   fluents: _{ alive: [_{id:hunter},_{id:wumpus1}],
+	       dir: [_{d:north,h:_{id:hunter}}],
+	       fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+	       fat_hunter: _{c:_{x:1,y:1},h:_{id:hunter}},
+	       game_state: running,
+	       has_arrow: [_{a:_{id:arrow1},h:_{id:hunter}}],
+	       has_gold: [],
+	       score: 0,
+	       visited: []
+	     },
+   plan: move,
+   previous_fluents: _{ alive: [_{id:hunter},_{id:wumpus1}],
+			dir: [_{d:north,h:_{id:hunter}}],
+			fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+			fat_hunter: _{c:_{x:1,y:1},h:_{id:hunter}},
+			game_state: running,
+			has_arrow: [_{a:_{id:arrow1},h:_{id:hunter}}],
+			has_gold: [],
+			score: 0,
+			visited: []
+		      }
+ }
+Updating State w/ action: moveCalculating effects of move 
+Trying case 1 for Move 
+Trying case 2 for Move 
+Trying case 3 for Move 
+Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
+			   dir: [dir{d:north,h:hunter{id:hunter}}],
+			   fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+			   fat_hunter: fat{ c: c{x:1,y:2},
+					    h: hunter{id:hunter}
+					  },
+			   game_state: running,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [],
+			   score: -1,
+			   visited: [v{from:c{x:1,y:1},to:c{x:1,y:2}}]
+			 }
+Calculated Next Percepts: [stench]completed(12, 0.21875, 469, 200, ok).
+/*Thu Jan 16 13:28:51 2025*/ request(13, 1737030531.711, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(2265),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+_{ eternals: _{ cells: [ _{x:0,y:0},
+			 _{x:1,y:0},
+			 _{x:2,y:0},
+			 _{x:3,y:0},
+			 _{x:4,y:0},
+			 _{x:5,y:0},
+			 _{x:0,y:1},
+			 _{x:1,y:1},
+			 _{x:2,y:1},
+			 _{x:3,y:1},
+			 _{x:4,y:1},
+			 _{x:5,y:1},
+			 _{x:0,y:2},
+			 _{x:1,y:2},
+			 _{x:2,y:2},
+			 _{x:3,y:2},
+			 _{x:4,y:2},
+			 _{x:5,y:2},
+			 _{x:0,y:3},
+			 _{x:1,y:3},
+			 _{x:2,y:3},
+			 _{x:3,y:3},
+			 _{x:4,y:3},
+			 _{x:5,y:3},
+			 _{x:0,y:4},
+			 _{x:1,y:4},
+			 _{x:2,y:4},
+			 _{x:3,y:4},
+			 _{x:4,y:4},
+			 _{x:5,y:4},
+			 _{x:0,y:5},
+			 _{x:1,y:5},
+			 _{x:2,y:5},
+			 _{x:3,y:5},
+			 _{x:4,y:5},
+			 _{x:5,y:5}
+		       ],
+		eat_exit: _{c:_{x:1,y:1},e:_{id:exit}},
+		eat_pit: [ _{c:_{x:4,y:4},p:_{id:pit3}},
+			   _{c:_{x:3,y:3},p:_{id:pit2}},
+			   _{c:_{x:3,y:1},p:_{id:pit1}}
+			 ],
+		eat_walls: [ _{c:_{x:5,y:5},w:_{id:wall20}},
+			     _{c:_{x:4,y:5},w:_{id:wall19}},
+			     _{c:_{x:3,y:5},w:_{id:wall18}},
+			     _{c:_{x:2,y:5},w:_{id:wall17}},
+			     _{c:_{x:1,y:5},w:_{id:wall16}},
+			     _{c:_{x:0,y:5},w:_{id:wall15}},
+			     _{c:_{x:5,y:4},w:_{id:wall14}},
+			     _{c:_{x:0,y:4},w:_{id:wall13}},
+			     _{c:_{x:5,y:3},w:_{id:wall12}},
+			     _{c:_{x:0,y:3},w:_{id:wall11}},
+			     _{c:_{x:5,y:2},w:_{id:wall10}},
+			     _{c:_{x:0,y:2},w:_{id:wall9}},
+			     _{c:_{x:5,y:1},w:_{id:wall8}},
+			     _{c:_{x:0,y:1},w:_{id:wall7}},
+			     _{c:_{x:5,y:0},w:_{id:wall6}},
+			     _{c:_{x:4,y:0},w:_{id:wall5}},
+			     _{c:_{x:3,y:0},w:_{id:wall4}},
+			     _{c:_{x:2,y:0},w:_{id:wall3}},
+			     _{c:_{x:1,y:0},w:_{id:wall2}},
+			     _{c:_{x:0,y:0},w:_{id:wall1}}
+			   ],
+		eat_wumpus: [_{c:_{x:1,y:3},w:_{id:wumpus1}}]
+	      },
+   fluents: _{ alive: [_{id:hunter},_{id:wumpus1}],
+	       dir: [_{d:north,h:_{id:hunter}}],
+	       fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+	       fat_hunter: _{c:_{x:1,y:2},h:_{id:hunter}},
+	       game_state: running,
+	       has_arrow: [_{a:_{id:arrow1},h:_{id:hunter}}],
+	       has_gold: [],
+	       score: -1,
+	       visited: [_{from:_{x:1,y:1},to:_{x:1,y:2}}]
+	     },
+   plan: move,
+   previous_fluents: _{ alive: [_{id:hunter},_{id:wumpus1}],
+			dir: [_{d:north,h:_{id:hunter}}],
+			fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+			fat_hunter: _{c:_{x:1,y:1},h:_{id:hunter}},
+			game_state: running,
+			has_arrow: [_{a:_{id:arrow1},h:_{id:hunter}}],
+			has_gold: [],
+			score: 0,
+			visited: []
+		      }
+ }
+Updating State w/ action: moveCalculating effects of move 
+Trying case 1 for Move 
+Trying case 2 for Move 
+Calculated Next Fluents:_{ alive: [_{id:wumpus1}],
+			   dir: [dir{d:north,h:hunter{id:hunter}}],
+			   fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+			   fat_hunter: fat{ c: c{x:1,y:3},
+					    h: hunter{id:hunter}
+					  },
+			   game_state: finished,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [],
+			   score: -1001,
+			   visited: [_{from:_{x:1,y:1},to:_{x:1,y:2}}]
+			 }
+Calculated Next Percepts: []completed(13, 0.265625, 446, 200, ok).
+/*Thu Jan 16 13:28:54 2025*/ request(14, 1737030534.996, [peer(ip(127,0,0,1)),method(options),request_uri('/init'),path('/init'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),access_control_request_method('PUT'),access_control_request_headers('content-type'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(14, 0.015625, 0, 200, ok).
+/*Thu Jan 16 13:28:55 2025*/ request(15, 1737030535.016, [peer(ip(127,0,0,1)),method(put),request_uri('/init'),path('/init'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(10),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+completed(15, 0.296875, 2267, 200, ok).
+/*Thu Jan 16 13:28:56 2025*/ request(16, 1737030536.309, [peer(ip(127,0,0,1)),method(options),request_uri('/default'),path('/default'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),access_control_request_method('PUT'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(16, 0.015625, 0, 200, ok).
+/*Thu Jan 16 13:28:56 2025*/ request(17, 1737030536.340, [peer(ip(127,0,0,1)),method(put),request_uri('/default'),path('/default'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0'),content_length(0)]).
+completed(17, 0.015625, 2476, 200, ok).
+/*Thu Jan 16 13:28:57 2025*/ request(18, 1737030537.366, [peer(ip(127,0,0,1)),method(put),request_uri('/default'),path('/default'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0'),content_length(0)]).
+completed(18, 0.015625, 2476, 200, ok).
+/*Thu Jan 16 13:28:58 2025*/ request(19, 1737030538.543, [peer(ip(127,0,0,1)),method(put),request_uri('/init'),path('/init'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(10),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+completed(19, 0.31250000000000006, 2267, 200, ok).
+/*Thu Jan 16 13:28:59 2025*/ request(20, 1737030539.304, [peer(ip(127,0,0,1)),method(put),request_uri('/init'),path('/init'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(10),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+completed(20, 0.328125, 2270, 200, ok).
+/*Thu Jan 16 13:29:00 2025*/ request(21, 1737030540.331, [peer(ip(127,0,0,1)),method(options),request_uri('/init'),path('/init'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),access_control_request_method('PUT'),access_control_request_headers('content-type'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(21, 0.015625, 0, 200, ok).
+/*Thu Jan 16 13:29:00 2025*/ request(22, 1737030540.366, [peer(ip(127,0,0,1)),method(put),request_uri('/init'),path('/init'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(10),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+completed(22, 0.3125000000000001, 2271, 200, ok).
+/*Thu Jan 16 13:29:01 2025*/ request(23, 1737030541.824, [peer(ip(127,0,0,1)),method(put),request_uri('/init'),path('/init'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(10),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+completed(23, 0.2968750000000001, 2290, 200, ok).
+/*Thu Jan 16 13:29:07 2025*/ request(24, 1737030547.044, [peer(ip(127,0,0,1)),method(options),request_uri('/init'),path('/init'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),access_control_request_method('PUT'),access_control_request_headers('content-type'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(24, 0.0, 0, 200, ok).
+/*Thu Jan 16 13:29:07 2025*/ request(25, 1737030547.068, [peer(ip(127,0,0,1)),method(put),request_uri('/init'),path('/init'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(10),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+/*Thu Jan 16 13:29:08 2025*/ request(26, 1737030548.405, [peer(ip(127,0,0,1)),method(put),request_uri('/init'),path('/init'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(10),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+completed(25, 7.515625, 23547, 200, ok).
+completed(26, 7.359375, 23559, 200, ok).
+/*Thu Jan 16 13:29:30 2025*/ request(27, 1737030570.720, [peer(ip(127,0,0,1)),method(options),request_uri('/default'),path('/default'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),access_control_request_method('PUT'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(27, 0.0, 0, 200, ok).
+/*Thu Jan 16 13:29:30 2025*/ request(28, 1737030570.742, [peer(ip(127,0,0,1)),method(put),request_uri('/default'),path('/default'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0'),content_length(0)]).
+completed(28, 0.0, 2476, 200, ok).
+/*Thu Jan 16 13:32:06 2025*/ request(29, 1737030726.550, [peer(ip(127,0,0,1)),method(options),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),access_control_request_method('PUT'),access_control_request_headers('content-type'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(29, 0.0, 0, 200, ok).
+/*Thu Jan 16 13:32:06 2025*/ request(30, 1737030726.628, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(2266),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+_{ eternals: _{ cells: [ _{x:0,y:0},
+			 _{x:1,y:0},
+			 _{x:2,y:0},
+			 _{x:3,y:0},
+			 _{x:4,y:0},
+			 _{x:5,y:0},
+			 _{x:0,y:1},
+			 _{x:1,y:1},
+			 _{x:2,y:1},
+			 _{x:3,y:1},
+			 _{x:4,y:1},
+			 _{x:5,y:1},
+			 _{x:0,y:2},
+			 _{x:1,y:2},
+			 _{x:2,y:2},
+			 _{x:3,y:2},
+			 _{x:4,y:2},
+			 _{x:5,y:2},
+			 _{x:0,y:3},
+			 _{x:1,y:3},
+			 _{x:2,y:3},
+			 _{x:3,y:3},
+			 _{x:4,y:3},
+			 _{x:5,y:3},
+			 _{x:0,y:4},
+			 _{x:1,y:4},
+			 _{x:2,y:4},
+			 _{x:3,y:4},
+			 _{x:4,y:4},
+			 _{x:5,y:4},
+			 _{x:0,y:5},
+			 _{x:1,y:5},
+			 _{x:2,y:5},
+			 _{x:3,y:5},
+			 _{x:4,y:5},
+			 _{x:5,y:5}
+		       ],
+		eat_exit: _{c:_{x:1,y:1},e:_{id:exit}},
+		eat_pit: [ _{c:_{x:4,y:4},p:_{id:pit3}},
+			   _{c:_{x:3,y:3},p:_{id:pit2}},
+			   _{c:_{x:3,y:1},p:_{id:pit1}}
+			 ],
+		eat_walls: [ _{c:_{x:5,y:5},w:_{id:wall20}},
+			     _{c:_{x:4,y:5},w:_{id:wall19}},
+			     _{c:_{x:3,y:5},w:_{id:wall18}},
+			     _{c:_{x:2,y:5},w:_{id:wall17}},
+			     _{c:_{x:1,y:5},w:_{id:wall16}},
+			     _{c:_{x:0,y:5},w:_{id:wall15}},
+			     _{c:_{x:5,y:4},w:_{id:wall14}},
+			     _{c:_{x:0,y:4},w:_{id:wall13}},
+			     _{c:_{x:5,y:3},w:_{id:wall12}},
+			     _{c:_{x:0,y:3},w:_{id:wall11}},
+			     _{c:_{x:5,y:2},w:_{id:wall10}},
+			     _{c:_{x:0,y:2},w:_{id:wall9}},
+			     _{c:_{x:5,y:1},w:_{id:wall8}},
+			     _{c:_{x:0,y:1},w:_{id:wall7}},
+			     _{c:_{x:5,y:0},w:_{id:wall6}},
+			     _{c:_{x:4,y:0},w:_{id:wall5}},
+			     _{c:_{x:3,y:0},w:_{id:wall4}},
+			     _{c:_{x:2,y:0},w:_{id:wall3}},
+			     _{c:_{x:1,y:0},w:_{id:wall2}},
+			     _{c:_{x:0,y:0},w:_{id:wall1}}
+			   ],
+		eat_wumpus: [_{c:_{x:1,y:3},w:_{id:wumpus1}}]
+	      },
+   fluents: _{ alive: [_{id:hunter},_{id:wumpus1}],
+	       dir: [_{d:north,h:_{id:hunter}}],
+	       fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+	       fat_hunter: _{c:_{x:1,y:1},h:_{id:hunter}},
+	       game_state: running,
+	       has_arrow: [_{a:_{id:arrow1},h:_{id:hunter}}],
+	       has_gold: [],
+	       score: 0,
+	       visited: []
+	     },
+   plan: climb,
+   previous_fluents: _{ alive: [_{id:hunter},_{id:wumpus1}],
+			dir: [_{d:north,h:_{id:hunter}}],
+			fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+			fat_hunter: _{c:_{x:1,y:2},h:_{id:hunter}},
+			game_state: running,
+			has_arrow: [_{a:_{id:arrow1},h:_{id:hunter}}],
+			has_gold: [],
+			score: -1,
+			visited: [_{from:_{x:1,y:1},to:_{x:1,y:2}}]
+		      }
+ }
+Updating State w/ action: climbCalculating effects of climb 
+Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
+			   dir: [_{d:north,h:_{id:hunter}}],
+			   fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+			   fat_hunter: fat{ c: _{x:1,y:1},
+					    h: hunter{id:hunter}
+					  },
+			   game_state: finished,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [],
+			   score: -1,
+			   visited: []
+			 }
+Calculated Next Percepts: []completed(30, 0.359375, 416, 200, ok).
+server(stopped, 1737039095).
+server(started, 1743082192).
+/*Thu Mar 27 14:29:55 2025*/ request(1, 1743082195.305, [peer(ip(127,0,0,1)),method(get),request_uri(/),path(/),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0'),connection('keep-alive'),upgrade_insecure_requests('1'),sec_fetch_dest(document),sec_fetch_mode(navigate),sec_fetch_site(none),sec_fetch_user('?1'),priority('u=0, i')]).
+completed(1, 0.04687500000000001, 367, 404, error(404,/)).
+/*Thu Mar 27 14:29:55 2025*/ request(2, 1743082195.458, [peer(ip(127,0,0,1)),method(get),request_uri('/favicon.ico'),path('/favicon.ico'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0'),connection('keep-alive'),referer('http://localhost:8080/'),sec_fetch_dest(image),sec_fetch_mode('no-cors'),sec_fetch_site('same-origin'),priority('u=6')]).
+completed(2, 0.0, 93, 404, error(404,'/favicon.ico')).
+/*Thu Mar 27 14:30:00 2025*/ request(3, 1743082200.386, [peer(ip(127,0,0,1)),method(get),request_uri(/),path(/),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0'),connection('keep-alive'),upgrade_insecure_requests('1'),sec_fetch_dest(document),sec_fetch_mode(navigate),sec_fetch_site(none),sec_fetch_user('?1'),priority('u=0, i')]).
+completed(3, 0.015625000000000007, 367, 404, error(404,/)).
+/*Thu Mar 27 14:33:16 2025*/ request(4, 1743082396.919, [peer(ip(127,0,0,1)),method(get),request_uri(/),path(/),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0'),connection('keep-alive'),upgrade_insecure_requests('1'),sec_fetch_dest(document),sec_fetch_mode(navigate),sec_fetch_site(none),sec_fetch_user('?1'),priority('u=0, i')]).
+completed(4, 0.0, 367, 404, error(404,/)).
+/*Thu Mar 27 14:33:17 2025*/ request(5, 1743082397.683, [peer(ip(127,0,0,1)),method(get),request_uri(/),path(/),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0'),connection('keep-alive'),upgrade_insecure_requests('1'),sec_fetch_dest(document),sec_fetch_mode(navigate),sec_fetch_site(none),sec_fetch_user('?1'),priority('u=0, i')]).
+completed(5, 0.015625000000000007, 367, 404, error(404,/)).
+server(stopped, 1743082431).
+server(started, 1743082668).
+/*Thu Mar 27 14:37:51 2025*/ request(1, 1743082671.938, [peer(ip(127,0,0,1)),method(get),request_uri(/),path(/),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0'),connection('keep-alive'),upgrade_insecure_requests('1'),sec_fetch_dest(document),sec_fetch_mode(navigate),sec_fetch_site(none),sec_fetch_user('?1'),priority('u=0, i')]).
+completed(1, 0.0625, 367, 404, error(404,/)).
+server(stopped, 1743082699).
+server(started, 1743082764).
+/*Thu Mar 27 14:39:27 2025*/ request(1, 1743082767.338, [peer(ip(127,0,0,1)),method(get),request_uri(/),path(/),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0'),connection('keep-alive'),upgrade_insecure_requests('1'),sec_fetch_dest(document),sec_fetch_mode(navigate),sec_fetch_site(none),sec_fetch_user('?1'),priority('u=0, i')]).
+completed(1, 0.078125, 367, 404, error(404,/)).
+/*Thu Mar 27 14:39:53 2025*/ request(2, 1743082793.126, [peer(ip(127,0,0,1)),method(options),request_uri('/init'),path('/init'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0'),access_control_request_method('PUT'),access_control_request_headers('content-type'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(2, 0.0, 0, 200, ok).
+/*Thu Mar 27 14:39:53 2025*/ request(3, 1743082793.185, [peer(ip(127,0,0,1)),method(put),request_uri('/init'),path('/init'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(10),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+completed(3, 0.0625, 2267, 200, ok).
+server(stopped, 1743082803).
+server(started, 1769446369).
+/*Mon Jan 26 17:53:36 2026*/ request(1, 1769446416.791, [peer(ip(127,0,0,1)),method(options),request_uri('/default'),path('/default'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),access_control_request_method('PUT'),referer('http://172.31.128.1:9000/'),origin('http://172.31.128.1:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('cross-site'),priority('u=4')]).
+completed(1, 0.03125000000000001, 0, 200, ok).
+/*Mon Jan 26 17:53:36 2026*/ request(2, 1769446416.845, [peer(ip(127,0,0,1)),method(put),request_uri('/default'),path('/default'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://172.31.128.1:9000/'),origin('http://172.31.128.1:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('cross-site'),priority('u=0'),content_length(0)]).
+completed(2, 0.015625, 2476, 200, ok).
+/*Mon Jan 26 17:53:38 2026*/ request(3, 1769446418.903, [peer(ip(127,0,0,1)),method(options),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),access_control_request_method('PUT'),access_control_request_headers('content-type'),referer('http://172.31.128.1:9000/'),origin('http://172.31.128.1:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('cross-site'),priority('u=4')]).
+completed(3, 0.015624999999999993, 0, 200, ok).
+/*Mon Jan 26 17:53:38 2026*/ request(4, 1769446418.923, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://172.31.128.1:9000/'),content_type('application/json'),content_length(2223),origin('http://172.31.128.1:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('cross-site'),priority('u=0')]).
+_{ eternals: _{ cells: [ _{x:0,y:0},
+			 _{x:1,y:0},
+			 _{x:2,y:0},
+			 _{x:3,y:0},
+			 _{x:4,y:0},
+			 _{x:5,y:0},
+			 _{x:0,y:1},
+			 _{x:1,y:1},
+			 _{x:2,y:1},
+			 _{x:3,y:1},
+			 _{x:4,y:1},
+			 _{x:5,y:1},
+			 _{x:0,y:2},
+			 _{x:1,y:2},
+			 _{x:2,y:2},
+			 _{x:3,y:2},
+			 _{x:4,y:2},
+			 _{x:5,y:2},
+			 _{x:0,y:3},
+			 _{x:1,y:3},
+			 _{x:2,y:3},
+			 _{x:3,y:3},
+			 _{x:4,y:3},
+			 _{x:5,y:3},
+			 _{x:0,y:4},
+			 _{x:1,y:4},
+			 _{x:2,y:4},
+			 _{x:3,y:4},
+			 _{x:4,y:4},
+			 _{x:5,y:4},
+			 _{x:0,y:5},
+			 _{x:1,y:5},
+			 _{x:2,y:5},
+			 _{x:3,y:5},
+			 _{x:4,y:5},
+			 _{x:5,y:5}
+		       ],
+		eat_exit: _{c:_{x:1,y:1},e:_{id:exit}},
+		eat_pit: [ _{c:_{x:4,y:4},p:_{id:pit3}},
+			   _{c:_{x:3,y:3},p:_{id:pit2}},
+			   _{c:_{x:3,y:1},p:_{id:pit1}}
+			 ],
+		eat_walls: [ _{c:_{x:5,y:5},w:_{id:wall20}},
+			     _{c:_{x:4,y:5},w:_{id:wall19}},
+			     _{c:_{x:3,y:5},w:_{id:wall18}},
+			     _{c:_{x:2,y:5},w:_{id:wall17}},
+			     _{c:_{x:1,y:5},w:_{id:wall16}},
+			     _{c:_{x:0,y:5},w:_{id:wall15}},
+			     _{c:_{x:5,y:4},w:_{id:wall14}},
+			     _{c:_{x:0,y:4},w:_{id:wall13}},
+			     _{c:_{x:5,y:3},w:_{id:wall12}},
+			     _{c:_{x:0,y:3},w:_{id:wall11}},
+			     _{c:_{x:5,y:2},w:_{id:wall10}},
+			     _{c:_{x:0,y:2},w:_{id:wall9}},
+			     _{c:_{x:5,y:1},w:_{id:wall8}},
+			     _{c:_{x:0,y:1},w:_{id:wall7}},
+			     _{c:_{x:5,y:0},w:_{id:wall6}},
+			     _{c:_{x:4,y:0},w:_{id:wall5}},
+			     _{c:_{x:3,y:0},w:_{id:wall4}},
+			     _{c:_{x:2,y:0},w:_{id:wall3}},
+			     _{c:_{x:1,y:0},w:_{id:wall2}},
+			     _{c:_{x:0,y:0},w:_{id:wall1}}
+			   ],
+		eat_wumpus: [_{c:_{x:1,y:3},w:_{id:wumpus1}}]
+	      },
+   fluents: _{ alive: [_{id:hunter},_{id:wumpus1}],
+	       dir: [_{d:north,h:_{id:hunter}}],
+	       fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+	       fat_hunter: _{c:_{x:1,y:1},h:_{id:hunter}},
+	       game_state: running,
+	       has_arrow: [_{a:_{id:arrow1},h:_{id:hunter}}],
+	       has_gold: [],
+	       score: 0,
+	       visited: []
+	     },
+   plan: move,
+   previous_fluents: _{ alive: [_{id:hunter},_{id:wumpus1}],
+			dir: [_{d:north,h:_{id:hunter}}],
+			fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+			fat_hunter: _{c:_{x:1,y:1},h:_{id:hunter}},
+			game_state: running,
+			has_arrow: [_{a:_{id:arrow1},h:_{id:hunter}}],
+			has_gold: [],
+			score: 0,
+			visited: []
+		      }
+ }
+Updating State w/ action: moveCalculating effects of move 
+Trying case 1 for Move 
+Trying case 2 for Move 
+Trying case 3 for Move 
+Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
+			   dir: [dir{d:north,h:hunter{id:hunter}}],
+			   fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+			   fat_hunter: fat{ c: c{x:1,y:2},
+					    h: hunter{id:hunter}
+					  },
+			   game_state: running,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [],
+			   score: -1,
+			   visited: [v{from:c{x:1,y:1},to:c{x:1,y:2}}]
+			 }
+Calculated Next Percepts: [stench]completed(4, 0.234375, 469, 200, ok).
+server(started, 1769451598).
+/*Mon Jan 26 19:21:44 2026*/ request(1, 1769451704.868, [peer(ip(127,0,0,1)),method(options),request_uri('/default'),path('/default'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),access_control_request_method('PUT'),referer('http://172.31.128.1:9000/'),origin('http://172.31.128.1:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('cross-site'),priority('u=4')]).
+completed(1, 0.046875, 0, 200, ok).
+/*Mon Jan 26 19:21:44 2026*/ request(2, 1769451704.952, [peer(ip(127,0,0,1)),method(put),request_uri('/default'),path('/default'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://172.31.128.1:9000/'),origin('http://172.31.128.1:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('cross-site'),priority('u=0'),content_length(0)]).
+completed(2, 0.015625, 2476, 200, ok).
+/*Mon Jan 26 19:24:02 2026*/ request(3, 1769451842.128, [peer(ip(127,0,0,1)),method(options),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),access_control_request_method('PUT'),access_control_request_headers('content-type'),referer('http://172.31.128.1:9000/'),origin('http://172.31.128.1:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('cross-site'),priority('u=4')]).
+completed(3, 0.0, 0, 200, ok).
+/*Mon Jan 26 19:24:02 2026*/ request(4, 1769451842.152, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://172.31.128.1:9000/'),content_type('application/json'),content_length(2223),origin('http://172.31.128.1:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('cross-site'),priority('u=0')]).
+_{ eternals: _{ cells: [ _{x:0,y:0},
+			 _{x:1,y:0},
+			 _{x:2,y:0},
+			 _{x:3,y:0},
+			 _{x:4,y:0},
+			 _{x:5,y:0},
+			 _{x:0,y:1},
+			 _{x:1,y:1},
+			 _{x:2,y:1},
+			 _{x:3,y:1},
+			 _{x:4,y:1},
+			 _{x:5,y:1},
+			 _{x:0,y:2},
+			 _{x:1,y:2},
+			 _{x:2,y:2},
+			 _{x:3,y:2},
+			 _{x:4,y:2},
+			 _{x:5,y:2},
+			 _{x:0,y:3},
+			 _{x:1,y:3},
+			 _{x:2,y:3},
+			 _{x:3,y:3},
+			 _{x:4,y:3},
+			 _{x:5,y:3},
+			 _{x:0,y:4},
+			 _{x:1,y:4},
+			 _{x:2,y:4},
+			 _{x:3,y:4},
+			 _{x:4,y:4},
+			 _{x:5,y:4},
+			 _{x:0,y:5},
+			 _{x:1,y:5},
+			 _{x:2,y:5},
+			 _{x:3,y:5},
+			 _{x:4,y:5},
+			 _{x:5,y:5}
+		       ],
+		eat_exit: _{c:_{x:1,y:1},e:_{id:exit}},
+		eat_pit: [ _{c:_{x:4,y:4},p:_{id:pit3}},
+			   _{c:_{x:3,y:3},p:_{id:pit2}},
+			   _{c:_{x:3,y:1},p:_{id:pit1}}
+			 ],
+		eat_walls: [ _{c:_{x:5,y:5},w:_{id:wall20}},
+			     _{c:_{x:4,y:5},w:_{id:wall19}},
+			     _{c:_{x:3,y:5},w:_{id:wall18}},
+			     _{c:_{x:2,y:5},w:_{id:wall17}},
+			     _{c:_{x:1,y:5},w:_{id:wall16}},
+			     _{c:_{x:0,y:5},w:_{id:wall15}},
+			     _{c:_{x:5,y:4},w:_{id:wall14}},
+			     _{c:_{x:0,y:4},w:_{id:wall13}},
+			     _{c:_{x:5,y:3},w:_{id:wall12}},
+			     _{c:_{x:0,y:3},w:_{id:wall11}},
+			     _{c:_{x:5,y:2},w:_{id:wall10}},
+			     _{c:_{x:0,y:2},w:_{id:wall9}},
+			     _{c:_{x:5,y:1},w:_{id:wall8}},
+			     _{c:_{x:0,y:1},w:_{id:wall7}},
+			     _{c:_{x:5,y:0},w:_{id:wall6}},
+			     _{c:_{x:4,y:0},w:_{id:wall5}},
+			     _{c:_{x:3,y:0},w:_{id:wall4}},
+			     _{c:_{x:2,y:0},w:_{id:wall3}},
+			     _{c:_{x:1,y:0},w:_{id:wall2}},
+			     _{c:_{x:0,y:0},w:_{id:wall1}}
+			   ],
+		eat_wumpus: [_{c:_{x:1,y:3},w:_{id:wumpus1}}]
+	      },
+   fluents: _{ alive: [_{id:hunter},_{id:wumpus1}],
+	       dir: [_{d:north,h:_{id:hunter}}],
+	       fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+	       fat_hunter: _{c:_{x:1,y:1},h:_{id:hunter}},
+	       game_state: running,
+	       has_arrow: [_{a:_{id:arrow1},h:_{id:hunter}}],
+	       has_gold: [],
+	       score: 0,
+	       visited: []
+	     },
+   plan: move,
+   previous_fluents: _{ alive: [_{id:hunter},_{id:wumpus1}],
+			dir: [_{d:north,h:_{id:hunter}}],
+			fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+			fat_hunter: _{c:_{x:1,y:1},h:_{id:hunter}},
+			game_state: running,
+			has_arrow: [_{a:_{id:arrow1},h:_{id:hunter}}],
+			has_gold: [],
+			score: 0,
+			visited: []
+		      }
+ }
+Updating State w/ action: moveCalculating effects of move 
+Trying case 1 for Move 
+Trying case 2 for Move 
+Trying case 3 for Move 
+Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
+			   dir: [dir{d:north,h:hunter{id:hunter}}],
+			   fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+			   fat_hunter: fat{ c: c{x:1,y:2},
+					    h: hunter{id:hunter}
+					  },
+			   game_state: running,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [],
+			   score: -1,
+			   visited: [v{from:c{x:1,y:1},to:c{x:1,y:2}}]
+			 }
+Calculated Next Percepts: [stench]completed(4, 0.23437500000000003, 469, 200, ok).
+server(stopped, 1769451854).
