@@ -46,7 +46,7 @@ Le hunter n'a actuellement aucun désir de gagner, il cherche seulement à parco
 
 # reste à faire
 - lorsque le hunter démarre à côté d'un puit, il tourne en rond => forcer le hunter à prendre un risque
-- actuellement le hunter ne sait jouer que sur un plateau 5*5 => rendre dynamique en fonction de la configuration du monde
+- ~~actuellement le hunter ne sait jouer que sur un plateau 5*5 => rendre dynamique en fonction de la configuration du monde~~
 - le hunter n'a pas encore comme objectif de sortir lorsqu'il récupère l'or => à implémenter
 - faire en sorte de baisser la probabilité du hunter à retourner sur ces pas
 afficher les probas correctement dans le débug ?
