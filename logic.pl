@@ -20,14 +20,13 @@
 % 2. HELPER PREDICATES (Non-Probabilistic, Reified)
 % ==============================================================================
 
-% Bridges for reif
 bool_to_t(1, true).
 bool_to_t(0, false).
 
 fd_gt_t(X, Y, T) :- X #> Y #<==> B, bool_to_t(B, T).
 member_t(Elem, List, T) :- memberd_t(Elem, List, T).
 
-% Reified valid_grid for Strategy (Decision Making)
+% Reified valid_grid for Strategy
 valid_grid_t(X, Y, Size, T) :- 
     X #>= 1 #<==> B1,
     X #=< Size #<==> B2,
@@ -42,8 +41,8 @@ valid_grid_t(X, Y, Size, T) :-
 :- pita.
 :- begin_lpad.
 
-% --- Background Knowledge (Internal to LPAD) ---
-% We use clpfd + labeling to ensure PITA receives integers, not attributes.
+% --- Background Knowledge ---
+% PITA requires concrete integers. We use labeling inside background predicates.
 
 valid_grid(X, Y, Size) :- 
     X #>= 1, X #=< Size,
@@ -53,18 +52,15 @@ valid_grid(X, Y, Size) :-
 start_pos(1, 1).
 
 adjacent(X, Y, NX, NY, Size) :- 
-    % Define relative positions using clpfd
     ( NX #= X,     NY #= Y + 1
     ; NX #= X,     NY #= Y - 1
     ; NX #= X + 1, NY #= Y
     ; NX #= X - 1, NY #= Y
     ),
-    % Validate and Label (Essential for PITA to work with clpfd)
     valid_grid(NX, NY, Size).
 
 % --- Probabilistic Model ---
 
-% Dynamic Priors based on grid size
 pit(X,Y, Size):Prob :- 
     valid_grid(X,Y, Size), 
     \+ start_pos(X,Y),
@@ -75,7 +71,6 @@ wumpus(X,Y, Size):Prob :-
     \+ start_pos(X,Y),
     Prob is 0.25 / Size.
 
-% Causal Rules
 breeze(X, Y, Size) :- 
     adjacent(X, Y, NX, NY, Size), 
     pit(NX, NY, Size).
@@ -103,19 +98,32 @@ decide_action(X, Y, Dir, Visited, History, Percepts, Size, HasGold, Action) :-
 
 choose_directional_move(X, Y, Dir, Visited, History, Size, HasGold, Action) :-
     build_evidence(History, Visited, Size, Evidence),
+    
     get_front_cell(X, Y, Dir, FX, FY),
     evaluate_utility(FX, FY, Evidence, Visited, Size, HasGold, UF),
+    
     next_dir_right(Dir, RDir),
     get_front_cell(X, Y, RDir, RX, RY),
     evaluate_utility(RX, RY, Evidence, Visited, Size, HasGold, UR),
+    
     next_dir_left(Dir, LDir),
     get_front_cell(X, Y, LDir, LX, LY),
     evaluate_utility(LX, LY, Evidence, Visited, Size, HasGold, UL),
+    
     format(user_error, '  [SCORES] Front: ~w, Right: ~w, Left: ~w~n', [UF, UR, UL]),
     
-    if_(fd_gt_t(UL, UF), 
-        if_(fd_gt_t(UL, UR), Action = left, Action = right),
-        if_(fd_gt_t(UR, UF), Action = right, Action = move)).
+    % Decision Logic:
+    % 1. If Front is SAFE (Score > 0), behave normally.
+    % 2. If Front is DANGER (Score 0), FORCE TURN (Right or Left).
+    if_(fd_gt_t(UF, 0),
+        % Normal: Choose best score
+        if_(fd_gt_t(UL, UF), 
+            if_(fd_gt_t(UL, UR), Action = left, Action = right),
+            if_(fd_gt_t(UR, UF), Action = right, Action = move)
+        ),
+        % Front blocked/dangerous: Must Turn
+        if_(fd_gt_t(UL, UR), Action = left, Action = right)
+    ).
 
 evaluate_utility(X, Y, Evidence, Visited, Size, HasGold, Utility) :-
     if_(valid_grid_t(X, Y, Size),
@@ -125,7 +133,6 @@ evaluate_utility(X, Y, Evidence, Visited, Size, HasGold, Utility) :-
         Utility #= 0).
 
 is_safe_t(X, Y, Evidence, Size, T) :-
-    % Probabilistic Inference
     ( prob((safe(X, Y, Size), Evidence), P_Joint),
       prob(Evidence, P_Ev),
       P_Ev > 0.000001
@@ -135,17 +142,20 @@ is_safe_t(X, Y, Evidence, Size, T) :-
     PInt is round(P * 100),
     format(user_error, '   > Cell (~w,~w) P(Safe)=~2f ', [X, Y, P]),
     
-    % Decision Threshold (0.75)
+    % Threshold 75%
     if_(fd_gt_t(PInt, 75), 
         (format(user_error, '[SAFE]~n', []), T = true), 
         (format(user_error, '[DANGER]~n', []), T = false)).
 
 calculate_goal_utility(X, Y, Visited, HasGold, Utility) :-
     if_(HasGold = true,
-        % Phase 2: Return to (1,1)
+        % Phase 2: Return to Start (1,1)
         (Dist #= abs(X - 1) + abs(Y - 1), Utility #= 100 - Dist),
-        % Phase 1: Explore
-        if_(member_t([X, Y], Visited), Utility #= 10, Utility #= 50)).
+        % Phase 1: Exploration
+        if_(member_t([X, Y], Visited), 
+            Utility #= 10,  % Already visited
+            Utility #= 50   % New safe cell (PRIORITY)
+        )).
 
 get_front_cell(X, Y, north, X, FY) :- FY #= Y + 1.
 get_front_cell(X, Y, south, X, FY) :- FY #= Y - 1.
@@ -210,7 +220,10 @@ handle_put_logic(Request) :-
     Percepts = CleanJSON.get(percepts, []),
     
     extract_state(Beliefs, X, Y, Dir, Visited, Size, HasGold),
-    format(user_error, '--- TOUR (Size ~w) --- Pos: ~w,~w ---~n', [Size, X, Y]),
+    
+    % LOG MODE for Debugging
+    (HasGold == true -> Mode = 'RETURN' ; Mode = 'EXPLORE'),
+    format(user_error, '--- TOUR (Size ~w) --- Pos: ~w,~w --- Mode: ~w ---~n', [Size, X, Y, Mode]),
     
     OldHistory = Beliefs.get(percept_history, []),
     CurrentMemory = _{x:X, y:Y, percepts:Percepts},
@@ -235,7 +248,17 @@ extract_state(Beliefs, X, Y, Dir, Visited, Size, HasGold) :-
     X is round(C.get(x, 1)), 
     Y is round(C.get(y, 1)), 
     Size is round(Beliefs.get(gridSize, 4)),
-    (get_dict(has_gold, Fluents, _) -> HasGold = true ; HasGold = false),
+    
+    % Robust HasGold check: Key must exist AND value must be true-like
+    (   get_dict(has_gold, Fluents, Val),
+        Val \== false, 
+        Val \== 'false', 
+        Val \== 0,
+        Val \== []
+    ->  HasGold = true
+    ;   HasGold = false
+    ),
+    
     (get_dict(dir, Fluents, DL), member(DirObj, DL), get_dict(d, DirObj, D) -> Dir = D ; Dir = north),
     (get_dict(visited, Fluents, VL) -> 
         findall([VX, VY], (member(VObj, VL), get_dict(to, VObj, VTo), VX is round(VTo.x), VY is round(VTo.y)), Visited)
