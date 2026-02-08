@@ -58,42 +58,38 @@ adjacent(X, Y, NX, NY, Size) :- valid_grid(NX, NY, Size), NX #= X - 1, NY #= Y.
 run_hunter :-
     catch(http_stop_server(8081, []), _, true),
     http_server(http_dispatch, [port(8081)]),
-    format(user_error, '~N~n[SERVER] Hunter Agent (Manual Headers) running on 8081...~n', []).
+    format(user_error, '~N~n[SERVER] Hunter Agent (Clean JSON) running on 8081...~n', []).
 
 :- http_handler(root(action), handle_hunter_request, []).
 
 % --- A. GESTION DU PRE-FLIGHT (OPTIONS) ---
-% On répond manuellement pour être sûr que le navigateur reçoit les droits
+% On laisse reply_json_dict envoyer une réponse vide mais correcte avec les headers CORS
 handle_hunter_request(Request) :-
     option(method(options), Request), !,
-    format('Status: 200 OK~n'),
-    format('Access-Control-Allow-Origin: *~n'),
-    format('Access-Control-Allow-Methods: PUT, OPTIONS~n'),
-    format('Access-Control-Allow-Headers: Content-Type~n'),
-    format('Content-Type: text/plain~n~n').
+    cors_enable(Request, [methods([put])]),
+    reply_json_dict(_{}). 
 
 % --- B. GESTION DE L'ACTION (PUT) ---
 handle_hunter_request(Request) :-
+    % 1. Activer CORS tout de suite
     cors_enable(Request, [methods([put])]),
     
+    % 2. Protéger tout le traitement par un catch
     catch(
-        handle_request_safe(Request),
+        handle_request_logic(Request),
         Error,
-        reply_error_manual(Error) % En cas de crash, on passe en mode manuel
+        handle_error(Error)
     ).
 
-% --- C. REPONSE D'ERREUR MANUELLE (Anti-CORS bug) ---
-% Écrit les headers 500 + CORS à la main pour éviter que le navigateur bloque
-reply_error_manual(Error) :-
+% Gestionnaire d'erreurs qui répond en JSON propre (évite le crash I/O)
+handle_error(Error) :-
     format(user_error, '~N[CRITICAL ERROR] ~w~n', [Error]),
     term_string(Error, Str),
-    format('Status: 500 Internal Server Error~n'),
-    format('Access-Control-Allow-Origin: *~n'), % <--- L'IMPORTANT EST ICI
-    format('Content-Type: application/json~n~n'),
-    format('{"status":"error", "error":~q}', [Str]).
+    % On force le status 500 via l'option de la librairie, pas manuellement
+    reply_json_dict(_{status: "error", message: Str}, [status(500)]).
 
-% --- D. LOGIQUE PRINCIPALE ---
-handle_request_safe(Request) :-
+% --- C. LOGIQUE PRINCIPALE ---
+handle_request_logic(Request) :-
     http_read_json_dict(Request, RequestJSON, [value_string_as(atom), tag('')]),
     untag(RequestJSON, CleanJSON),
     
@@ -105,6 +101,7 @@ handle_request_safe(Request) :-
 
     % Mémoire
     OldHistory = Beliefs.get(percept_history, []),
+    
     ( integer(X) -> XInt=X ; XInt=1 ), 
     ( integer(Y) -> YInt=Y ; YInt=1 ),
     CurrentMemory = _{x:XInt, y:YInt, percepts:Percepts},
@@ -126,11 +123,13 @@ handle_request_safe(Request) :-
     
     % Réponse
     NewBeliefs = Beliefs.put(percept_history, NewHistory),
+    
     Response = _{
         hunterState: _{ beliefs: NewBeliefs, percepts: Percepts },
         action: Action
     },
 
+    % Envoi final standard
     reply_json_dict(Response).
 
 
@@ -138,7 +137,7 @@ safe_int(Val, Int) :- integer(Val) -> Int = Val ; fd_size(Val, sup) -> Int = 1 ;
 match_pos(X, Y, Entry) :- Entry.x == X, Entry.y == Y.
 
 % ==============================================================================
-% 4. STRATEGIE
+% 4. STRATEGIE (CORRIGÉ)
 % ==============================================================================
 
 decide_action(_, _, _, _, _, Percepts, _, grab) :-
@@ -183,9 +182,14 @@ evaluate_cell(X, Y, Evidence, Visited, Size, Score) :-
     
     format(user_error, '   > Cell (~w,~w) P(Safe)=~2f ', [X, Y, P]),
     ( P > 0.8 -> 
-        ( member([X, Y], Visited) -> Score = 1, write('[OK-VU]~n') 
-        ; Score = 2, write('[OK-NEW]~n') )
-    ; Score = 0, write('[DANGER]~n') ).
+        ( member([X, Y], Visited) -> 
+            Score = 1, format(user_error, '[OK-VU]~n', []) % FIX: format(user_error, ...)
+        ; 
+            Score = 2, format(user_error, '[OK-NEW]~n', []) % FIX: format(user_error, ...)
+        )
+    ; 
+        Score = 0, format(user_error, '[DANGER]~n', []) % FIX: format(user_error, ...)
+    ).
 
 % ==============================================================================
 % 5. CONSTRUCTION PREUVES
