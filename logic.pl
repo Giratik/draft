@@ -123,25 +123,38 @@ choose_directional_move(X, Y, Dir, Visited, History, Size, MissionComplete, Acti
     
     format(user_error, '  [SCORES] Front: ~w, Right: ~w, Left: ~w~n', [UF, UR, UL]),
     
-    if_(fd_gt_t(UF, 0),
-        % Normal: Choose best score
-        if_(fd_gt_t(UL, UF), 
-            if_(fd_gt_t(UL, UR), Action = left, Action = right),
-            if_(fd_gt_t(UR, UF), Action = right, Action = move)
-        ),
-        % Front blocked/dangerous: Must Turn
-        if_(fd_gt_t(UL, UR), Action = left, Action = right)
+    % --- MODIFICATION : SAUT DE L'ANGE (LEAP OF FAITH) ---
+    % Si on est bloqué en (1,1) (tous les scores à 0 cause danger)
+    ( (X == 1, Y == 1, UF == 0, UR == 0, UL == 0) ->
+        valid_grid_t(FX, FY, Size, IsFrontValid),
+        ( IsFrontValid == true ->
+             % Si la case devant est valide (pas un mur), on saute !
+             format(user_error, '  -> SAUT DE L\'ANGE (Bloque en 1,1)~n', []),
+             Action = move
+        ;
+             % Si c'est un mur, on tourne pour chercher une ouverture
+             Action = right
+        )
+    ;
+    % --- FIN MODIFICATION ---
+        if_(fd_gt_t(UF, 0),
+            % Normal: Choose best score
+            if_(fd_gt_t(UL, UF), 
+                if_(fd_gt_t(UL, UR), Action = left, Action = right),
+                if_(fd_gt_t(UR, UF), Action = right, Action = move)
+            ),
+            % Front blocked/dangerous: Must Turn
+            if_(fd_gt_t(UL, UR), Action = left, Action = right)
+        )
     ).
 
 evaluate_utility(X, Y, Evidence, Visited, Size, MissionComplete, Utility) :-
     if_(valid_grid_t(X, Y, Size),
-        % --- MODIFICATION ICI : On passe Visited à is_safe_t ---
         if_(is_safe_t(X, Y, Evidence, Visited, Size),
             calculate_goal_utility(X, Y, Visited, MissionComplete, Utility),
             Utility #= 0),
         Utility #= 0).
 
-% Nouvelle signature : prend Visited en argument supplémentaire
 is_safe_t(X, Y, Evidence, Visited, Size, T) :-
     % 1. PRIORITÉ ABSOLUE : Si la case est visitée, elle est SÛRE.
     if_(member_t([X, Y], Visited),
