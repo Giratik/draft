@@ -141,25 +141,35 @@ choose_directional_move(X, Y, Dir, Visited, History, Size, HasGold, Action) :-
 
 evaluate_utility(X, Y, Evidence, Visited, Size, HasGold, Utility) :-
     if_(valid_grid_t(X, Y, Size),
-        if_(is_safe_t(X, Y, Evidence, Size),
+        if_(is_safe_t(X, Y, Evidence, Visited, Size),
             calculate_goal_utility(X, Y, Visited, HasGold, Utility),
             Utility #= 0),
         Utility #= 0).
 
-is_safe_t(X, Y, Evidence, Size, T) :-
-    ( prob((safe(X, Y, Size), Evidence), P_Joint),
-      prob(Evidence, P_Ev),
-      P_Ev > 0.000001
-    -> P is P_Joint / P_Ev
-    ;  P = 0.5 ),
-    
-    PInt is round(P * 100),
-    format(user_error, '   > Cell (~w,~w) P(Safe)=~2f ', [X, Y, P]),
-    
-    % Threshold 75%
-    if_(fd_gt_t(PInt, 75), 
-        (format(user_error, '[SAFE]~n', []), T = true), 
-        (format(user_error, '[DANGER]~n', []), T = false)).
+is_safe_t(X, Y, Evidence, Visited, Size, T) :-
+    % 1. PRIORITÉ ABSOLUE : Si la case est visitée, elle est SÛRE.
+    if_(member_t([X, Y], Visited),
+        (
+            format(user_error, '   > Cell (~w,~w) [KNOWN SAFE - VISITED]~n', [X, Y]), 
+            T = true
+        ),
+        
+        % 2. SINON : On demande au moteur probabiliste (PITA)
+        (
+            ( prob((safe(X, Y, Size), Evidence), P_Joint),
+              prob(Evidence, P_Ev),
+              P_Ev > 0.000001
+            -> P is P_Joint / P_Ev
+            ;  P = 0.5 ), % Fallback si incertitude totale
+            
+            PInt is round(P * 100),
+            format(user_error, '   > Cell (~w,~w) P(Safe)=~2f ', [X, Y, P]),
+            
+            if_(fd_gt_t(PInt, 75), 
+                (format(user_error, '[SAFE]~n', []), T = true), 
+                (format(user_error, '[DANGER]~n', []), T = false))
+        )
+    ).
 
 calculate_goal_utility(X, Y, Visited, HasGold, Utility) :-
     if_(HasGold = true,
