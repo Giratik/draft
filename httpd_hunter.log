@@ -3884,3 +3884,8 @@ completed(1, 0.015625, 2, 200, ok).
 /*Sun Feb 08 19:13:13 2026*/ request(2, 1770574393.953, [peer(ip(127,0,0,1)),method(put),request_uri('/action'),path('/action'),http_version(1-1),host(localhost),port(8081),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(1875),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
 completed(2, 0.0, 33, 500, ok).
 server(stopped, 1770574549).
+server(started, 1770574564).
+/*Sun Feb 08 19:16:03 2026*/ request(1, 1770574563.731, [peer(ip(127,0,0,1)),method(options),request_uri('/action'),path('/action'),http_version(1-1),host(localhost),port(8081),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),access_control_request_method('PUT'),access_control_request_headers('content-type'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(1, 0.015625, 2, 200, ok).
+/*Sun Feb 08 19:16:03 2026*/ request(2, 1770574563.743, [peer(ip(127,0,0,1)),method(put),request_uri('/action'),path('/action'),http_version(1-1),host(localhost),port(8081),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(1875),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+completed(2, 0.09375000000000001, 2405, 200, ok).
