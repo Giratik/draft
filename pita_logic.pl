@@ -3,7 +3,7 @@
 :- module(hunter_server, [run_hunter/0]).
 
 % ==============================================================================
-% 1. IMPORTATION DES MODULES
+% 1. LIBRARIES
 % ==============================================================================
 :- use_module(library(http/http_server)).
 :- use_module(library(http/http_json)).
@@ -11,198 +11,279 @@
 :- use_module(library(http/http_log)).
 :- use_module(library(clpfd)). 
 :- use_module(library(pita)).
+:- use_module(library(lists)).
+:- use_module(library(apply)).
+:- use_module(library(reif)). 
+:- use_module(library(option)).
 
 % ==============================================================================
-% 2. CONFIGURATION PITA (Modèle Probabiliste)
+% 2. HELPER PREDICATES (Non-Probabilistic, Reified)
+% ==============================================================================
+
+bool_to_t(1, true).
+bool_to_t(0, false).
+
+fd_gt_t(X, Y, T) :- X #> Y #<==> B, bool_to_t(B, T).
+member_t(Elem, List, T) :- memberd_t(Elem, List, T).
+
+% Reified valid_grid for Strategy
+valid_grid_t(X, Y, Size, T) :- 
+    X #>= 1 #<==> B1,
+    X #=< Size #<==> B2,
+    Y #>= 1 #<==> B3,
+    Y #=< Size #<==> B4,
+    B1 + B2 + B3 + B4 #= 4 #<==> BAll,
+    bool_to_t(BAll, T).
+
+% ==============================================================================
+% 3. PROBABILISTIC LOGIC (LPAD)
 % ==============================================================================
 :- pita.
 :- begin_lpad.
 
-% --- Monde ---
-valid_grid(X,Y) :- member(X, [0,1,2,3,4,5]), member(Y, [0,1,2,3,4,5]).
-start_pos(1,1).
+% --- Background Knowledge ---
+% PITA requires concrete integers. We use labeling inside background predicates.
 
-% --- Priors ---
-pit(X,Y):0.2     :- valid_grid(X,Y), \+ start_pos(X,Y).
-wumpus(X,Y):0.05 :- valid_grid(X,Y), \+ start_pos(X,Y).
+valid_grid(X, Y, Size) :- 
+    X #>= 1, X #=< Size,
+    Y #>= 1, Y #=< Size,
+    labeling([], [X, Y]).
 
-% --- Causalité ---
-breeze(X, Y) :- adjacent(X, Y, NX, NY), pit(NX, NY).
-stench(X, Y) :- adjacent(X, Y, NX, NY), wumpus(NX, NY).
+start_pos(1, 1).
 
-% --- Sécurité ---
-safe(X,Y) :- \+ pit(X,Y), \+ wumpus(X,Y).
+adjacent(X, Y, NX, NY, Size) :- 
+    ( NX #= X,     NY #= Y + 1
+    ; NX #= X,     NY #= Y - 1
+    ; NX #= X + 1, NY #= Y
+    ; NX #= X - 1, NY #= Y
+    ),
+    valid_grid(NX, NY, Size).
 
-% --- Adjacence ---
-adjacent(X, Y, NX, NY) :- valid_grid(NX, NY), NX #= X,     NY #= Y + 1.
-adjacent(X, Y, NX, NY) :- valid_grid(NX, NY), NX #= X,     NY #= Y - 1.
-adjacent(X, Y, NX, NY) :- valid_grid(NX, NY), NX #= X + 1, NY #= Y.
-adjacent(X, Y, NX, NY) :- valid_grid(NX, NY), NX #= X - 1, NY #= Y.
+% --- Probabilistic Model ---
+
+pit(X,Y, Size):Prob :- 
+    valid_grid(X,Y, Size), 
+    \+ start_pos(X,Y),
+    Prob is 0.75 / Size.
+
+wumpus(X,Y, Size):Prob :- 
+    valid_grid(X,Y, Size), 
+    \+ start_pos(X,Y),
+    Prob is 0.25 / Size.
+
+breeze(X, Y, Size) :- 
+    adjacent(X, Y, NX, NY, Size), 
+    pit(NX, NY, Size).
+
+stench(X, Y, Size) :- 
+    adjacent(X, Y, NX, NY, Size), 
+    wumpus(NX, NY, Size).
+
+safe(X, Y, Size) :- 
+    \+ pit(X, Y, Size), 
+    \+ wumpus(X, Y, Size).
 
 :- end_lpad.
 
 % ==============================================================================
-% 3. SERVEUR HTTP
+% 4. DECISION STRATEGY
 % ==============================================================================
+
+decide_action(X, Y, Dir, Visited, History, Percepts, Size, HasGold, Action) :-
+    if_(member_t(glitter, Percepts), 
+        (format(user_error, '  -> REFLEX: Gold Found!~n', []), Action = grab),
+        if_(member_t(bump, Percepts), 
+            (format(user_error, '  -> REFLEX: Bump!~n', []), Action = right), 
+            if_((HasGold = true, X = 1, Y = 1),
+                (format(user_error, '  -> REFLEX: At Start with Gold! Climbing!~n', []), Action = climb),
+                choose_directional_move(X, Y, Dir, Visited, History, Size, HasGold, Action)))).
+
+choose_directional_move(X, Y, Dir, Visited, History, Size, HasGold, Action) :-
+    build_evidence(History, Visited, Size, Evidence),
+    
+    get_front_cell(X, Y, Dir, FX, FY),
+    evaluate_utility(FX, FY, Evidence, Visited, Size, HasGold, UF),
+    
+    next_dir_right(Dir, RDir),
+    get_front_cell(X, Y, RDir, RX, RY),
+    evaluate_utility(RX, RY, Evidence, Visited, Size, HasGold, UR),
+    
+    next_dir_left(Dir, LDir),
+    get_front_cell(X, Y, LDir, LX, LY),
+    evaluate_utility(LX, LY, Evidence, Visited, Size, HasGold, UL),
+    
+    format(user_error, '  [SCORES] Front: ~w, Right: ~w, Left: ~w~n', [UF, UR, UL]),
+    
+    % --- MODIFICATION : SAUT DE L'ANGE (LEAP OF FAITH) ---
+    % Si on est bloqué en (1,1) (tous les scores à 0 cause danger)
+    ( (X == 1, Y == 1, UF == 0, UR == 0, UL == 0) ->
+        valid_grid_t(FX, FY, Size, IsFrontValid),
+        ( IsFrontValid == true ->
+             % Si la case devant est valide (pas un mur), on saute !
+             format(user_error, '  -> SAUT DE L\'ANGE (Bloque en 1,1)~n', []),
+             Action = move
+        ;
+             % Si c'est un mur, on tourne à droite (seule option restante)
+             Action = right
+        )
+    ;
+    % --- FIN MODIFICATION ---
+        if_(fd_gt_t(UF, 0),
+            % Normal: Choose best score
+            if_(fd_gt_t(UL, UF), 
+                if_(fd_gt_t(UL, UR), Action = left, Action = right),
+                if_(fd_gt_t(UR, UF), Action = right, Action = move)
+            ),
+            % Front blocked/dangerous: Must Turn
+            if_(fd_gt_t(UL, UR), Action = left, Action = right)
+        )
+    ).
+
+evaluate_utility(X, Y, Evidence, Visited, Size, HasGold, Utility) :-
+    if_(valid_grid_t(X, Y, Size),
+        if_(is_safe_t(X, Y, Evidence, Size),
+            calculate_goal_utility(X, Y, Visited, HasGold, Utility),
+            Utility #= 0),
+        Utility #= 0).
+
+is_safe_t(X, Y, Evidence, Size, T) :-
+    ( prob((safe(X, Y, Size), Evidence), P_Joint),
+      prob(Evidence, P_Ev),
+      P_Ev > 0.000001
+    -> P is P_Joint / P_Ev
+    ;  P = 0.5 ),
+    
+    PInt is round(P * 100),
+    format(user_error, '   > Cell (~w,~w) P(Safe)=~2f ', [X, Y, P]),
+    
+    % Threshold 75%
+    if_(fd_gt_t(PInt, 75), 
+        (format(user_error, '[SAFE]~n', []), T = true), 
+        (format(user_error, '[DANGER]~n', []), T = false)).
+
+calculate_goal_utility(X, Y, Visited, HasGold, Utility) :-
+    if_(HasGold = true,
+        % Phase 2: Return to Start (1,1)
+        (Dist #= abs(X - 1) + abs(Y - 1), Utility #= 100 - Dist),
+        % Phase 1: Exploration
+        if_(member_t([X, Y], Visited), 
+            Utility #= 10,  % Already visited
+            Utility #= 50   % New safe cell (PRIORITY)
+        )).
+
+get_front_cell(X, Y, north, X, FY) :- FY #= Y + 1.
+get_front_cell(X, Y, south, X, FY) :- FY #= Y - 1.
+get_front_cell(X, Y, east,  FX, Y) :- FX #= X + 1.
+get_front_cell(X, Y, west,  FX, Y) :- FX #= X - 1.
+
+next_dir_right(north, east). next_dir_right(east, south).
+next_dir_right(south, west). next_dir_right(west, north).
+next_dir_left(north, west).  next_dir_left(west, south).
+next_dir_left(south, east).  next_dir_left(east, north).
+
+% ==============================================================================
+% 5. INFRASTRUCTURE & HANDLERS
+% ==============================================================================
+
+build_evidence(History, Visited, Size, EvidenceConj) :-
+    maplist(history_to_evidence(Size), History, EvidenceLists),
+    flatten(EvidenceLists, HistoricalEvidence),
+    findall(\+ pit(Vx, Vy, Size), member([Vx, Vy], Visited), SafePits),
+    findall(\+ wumpus(Wx, Wy, Size), member([Wx, Wy], Visited), SafeWumps),
+    append([HistoricalEvidence, SafePits, SafeWumps], FullList),
+    list_to_conj(FullList, EvidenceConj).
+
+history_to_evidence(Size, Entry, [S, B]) :-
+    X is round(Entry.x), Y is round(Entry.y), P = Entry.percepts,
+    if_(member_t(stench, P), S = stench(X, Y, Size), S = \+(stench(X, Y, Size))),
+    if_(member_t(breeze, P), B = breeze(X, Y, Size), B = \+(breeze(X, Y, Size))).
+
+list_to_conj([], true).
+list_to_conj([H|T], Conj) :- list_to_conj_rec(T, H, Conj).
+list_to_conj_rec([], Acc, Acc).
+list_to_conj_rec([H|T], Acc, (H, Rest)) :- list_to_conj_rec(T, Acc, Rest).
+
 :- set_setting(http:logfile, 'httpd_hunter.log').
 :- set_setting(http:cors, [*]).
 
-run_hunter :-
-    catch(http_stop_server(8081, []), _, true),
-    http_server(http_dispatch, [port(8081)]),
-    format(user_error, '~N~n[SERVER] Hunter Agent (Smart Explorer) running on 8081...~n', []).
-
-:- http_handler(root(action), handle_hunter_request, []).
-
 handle_hunter_request(Request) :-
-    option(method(options), Request), !,
-    cors_enable(Request, [methods([put])]),
-    format('Content-type: text/plain\r\n\r\n').
+    option(method(Method), Request),
+    handle_method(Method, Request).
 
-handle_hunter_request(Request) :-
-    cors_enable,
+handle_method(options, Request) :-
+    cors_enable(Request, [methods([put, options])]),
+    reply_json_dict(_{}).
+
+handle_method(put, Request) :-
+    cors_enable(Request, [methods([put, options])]),
     catch(
-        http_read_json_dict(Request, RequestJSON, [value_string_as(atom), tag('')]),
+        handle_put_logic(Request),
         Error,
-        (format(user_error, '[ERREUR] JSON invalide: ~w~n', [Error]), fail)
-    ),
+        (
+            format(user_error, '[CRITICAL ERROR] ~w~n', [Error]),
+            reply_json_dict(_{error: "Internal Server Error"}, [status(500)])
+        )
+    ).
 
+handle_put_logic(Request) :-
+    format(user_error, '~N~n--- [HTTP] New Request Received ---~n', []),
+    http_read_json_dict(Request, RequestJSON, [value_string_as(atom), tag('')]),
     untag(RequestJSON, CleanJSON),
-    Beliefs  = CleanJSON.get(beliefs, _{}),
+    
+    Beliefs = CleanJSON.get(beliefs, _{}),
     Percepts = CleanJSON.get(percepts, []),
     
-    extract_state(Beliefs, X, Y, Dir, Visited),
-
-    format(user_error, '~N~n================================================~n', []),
-    format(user_error, '          [HUNTER ACTION REQUEST]               ~n', []),
-    format(user_error, '------------------------------------------------~n', []),
-    format(user_error, '  POS: ~w,~w (~w)~n', [X, Y, Dir]),
-    format(user_error, '  PERCEPTS: ~w~n', [Percepts]),
-    format(user_error, '================================================~n', []),
-
-    decide_action(X, Y, Dir, Visited, Percepts, Action),
+    extract_state(Beliefs, X, Y, Dir, Visited, Size, HasGold),
+    
+    % LOG MODE for Debugging
+    (HasGold == true -> Mode = 'RETURN' ; Mode = 'EXPLORE'),
+    format(user_error, '--- TOUR (Size ~w) --- Pos: ~w,~w --- Mode: ~w ---~n', [Size, X, Y, Mode]),
+    
+    OldHistory = Beliefs.get(percept_history, []),
+    CurrentMemory = _{x:X, y:Y, percepts:Percepts},
+    NewHistory = [CurrentMemory | OldHistory],
+    
+    decide_action(X, Y, Dir, Visited, NewHistory, Percepts, Size, HasGold, Action),
+    format(user_error, '  -> Decision: ~w~n', [Action]),
     
     Response = _{
-        hunterState: _{ beliefs: Beliefs, percepts: Percepts },
+        hunterState: _{ beliefs: Beliefs.put(percept_history, NewHistory), percepts: Percepts },
         action: Action
     },
     reply_json_dict(Response).
 
+handle_method(Method, _) :-
+    format(user_error, '[WARNING] Unknown method: ~w~n', [Method]),
+    reply_json_dict(_{error: "Method not allowed"}, [status(405)]).
 
-% ==============================================================================
-% 4. CERVEAU (Stratégie d'Exploration)
-% ==============================================================================
-
-% Règle 1: OR -> GRAB
-decide_action(_, _, _, _, Percepts, grab) :-
-    member(glitter, Percepts),
-    format(user_error, '  -> DECISION: GRAB (Or!)~n', []), !.
-
-% Règle 2: MUR -> RIGHT
-decide_action(_, _, _, _, Percepts, right) :-
-    member(bump, Percepts),
-    format(user_error, '  -> DECISION: RIGHT (Mur)~n', []), !.
-
-% Règle 3: Comparaison des options (Devant vs Droite)
-decide_action(X, Y, Dir, Visited, Percepts, Action) :-
-    % A. Construire les preuves PITA
-    build_evidence(X, Y, Percepts, Visited, EvidenceConj),
-    
-    % B. Evaluer le score de la case DEVANT
-    get_front_cell(X, Y, Dir, FrontX, FrontY),
-    evaluate_cell(FrontX, FrontY, EvidenceConj, Visited, ScoreFront),
-    
-    % C. Evaluer le score de la case à DROITE (Simulation de rotation)
-    next_dir_right(Dir, RightDir),
-    get_front_cell(X, Y, RightDir, RightX, RightY),
-    evaluate_cell(RightX, RightY, EvidenceConj, Visited, ScoreRight),
-    
-    format(user_error, '  [SCORES] Front(~w,~w)=~w | Right(~w,~w)=~w~n', 
-           [FrontX, FrontY, ScoreFront, RightX, RightY, ScoreRight]),
-
-    % D. Prise de décision
-    ( ScoreRight > ScoreFront ->
-        Action = right,
-        format(user_error, '  -> DECISION: RIGHT (Meilleure opportunité à droite)~n', [])
-    ; ScoreFront > 0 ->
-        Action = move,
-        format(user_error, '  -> DECISION: MOVE (Devant est acceptable)~n', [])
-    ;
-        Action = right,
-        format(user_error, '  -> DECISION: RIGHT (Cul-de-sac ou Danger devant)~n', [])
-    ).
-
-
-% ==============================================================================
-% 5. EVALUATION (PITA + Heuristique)
-% ==============================================================================
-
-% evaluate_cell(+X, +Y, +Evidence, +Visited, -Score)
-% Score 2 : Safe + Non visité (Priorité max)
-% Score 1 : Safe + Déjà visité (Repli)
-% Score 0 : Danger ou Mur (Interdit)
-
-evaluate_cell(X, Y, _, _, 0) :-
-    \+ is_valid_coordinate(X, Y), !. % Mur
-
-evaluate_cell(X, Y, Evidence, Visited, Score) :-
-    % 1. Calcul Probabiliste P(Safe)
-    ( prob((safe(X, Y), Evidence), P_Joint),
-      prob(Evidence, P_Ev),
-      P_Ev > 0.000001
-    ->
-        P is P_Joint / P_Ev
-    ;
-        P = 0.5 % Incertitude
-    ),
-    
-    ( P > 0.8 -> % Seuil de confiance 80%
-        % La case est sûre, vérifions si elle est visitée
-        ( member([X, Y], Visited) ->
-             Score = 1 % Déjà vu (Ennuyeux mais safe)
-        ;
-             Score = 2 % Nouveau ! (Exploration)
-        )
-    ;
-        Score = 0 % Trop dangereux
-    ).
-
-
-% ==============================================================================
-% 6. UTILITAIRES
-% ==============================================================================
-
-extract_state(Beliefs, X, Y, Dir, VisitedCoordinates) :-
+extract_state(Beliefs, X, Y, Dir, Visited, Size, HasGold) :-
     Fluents = Beliefs.get(certain_fluents, _{}),
     H = Fluents.get(fat_hunter, _{}), C = H.get(c, _{}),
-    RawX = C.get(x, 1), RawY = C.get(y, 1),
-    X #= RawX, Y #= RawY,
-    ( get_dict(dir, Fluents, DL), member(dir{d:D, h:_}, DL) -> Dir = D ; Dir = north ),
-    ( get_dict(visited, Fluents, VL) -> 
-        findall([VX, VY], (member(VObj, VL), get_dict(to, VObj, VTo), VX = VTo.x, VY = VTo.y), VisitedCoordinates)
-    ; VisitedCoordinates = [] ).
+    X is round(C.get(x, 1)), 
+    Y is round(C.get(y, 1)), 
+    Size is round(Beliefs.get(gridSize, 4)),
+    
+    % Check has_gold list: true if not empty, false otherwise
+    (   get_dict(has_gold, Fluents, GoldList),
+        is_list(GoldList),
+        GoldList \== []
+    ->  HasGold = true
+    ;   HasGold = false
+    ),
+    
+    (get_dict(dir, Fluents, DL), member(DirObj, DL), get_dict(d, DirObj, D) -> Dir = D ; Dir = north),
+    (get_dict(visited, Fluents, VL) -> 
+        findall([VX, VY], (member(VObj, VL), get_dict(to, VObj, VTo), VX is round(VTo.x), VY is round(VTo.y)), Visited)
+    ; Visited = []).
 
-build_evidence(X, Y, Percepts, Visited, EvidenceConj) :-
-    ( member(breeze, Percepts) -> B = breeze(X,Y) ; B = (\+ breeze(X,Y)) ),
-    ( member(stench, Percepts) -> S = stench(X,Y) ; S = (\+ stench(X,Y)) ),
-    findall(\+ pit(Vx, Vy), member([Vx, Vy], Visited), SafePits),
-    findall(\+ wumpus(Wx, Wy), member([Wx, Wy], Visited), SafeWumpus),
-    append([B, S | SafePits], SafeWumpus, EvidenceList),
-    list_to_conj(EvidenceList, EvidenceConj).
-
-get_front_cell(X, Y, north, FX, FY) :- FX #= X,     FY #= Y + 1.
-get_front_cell(X, Y, south, FX, FY) :- FX #= X,     FY #= Y - 1.
-get_front_cell(X, Y, east,  FX, FY) :- FX #= X + 1, FY #= Y.
-get_front_cell(X, Y, west,  FX, FY) :- FX #= X - 1, FY #= Y.
-
-next_dir_right(north, east). next_dir_right(east, south).
-next_dir_right(south, west). next_dir_right(west, north).
-
-is_valid_coordinate(X, Y) :- member(X, [0,1,2,3,4,5]), member(Y, [0,1,2,3,4,5]).
-list_to_conj([], true).
-list_to_conj([H], H) :- !.
-list_to_conj([H|T], (H, R)) :- list_to_conj(T, R).
 untag(D, DOut) :- is_dict(D), !, dict_pairs(D, _, P), maplist(untag_pair, P, NP), dict_create(DOut, _, NP).
 untag(L, LOut) :- is_list(L), !, maplist(untag, L, LOut).
 untag(V, V).
 untag_pair(K-V, K-VO) :- untag(V, VO).
+
+run_hunter :-
+    catch(http_stop_server(8081, []), _, true),
+    http_server(http_dispatch, [port(8081)]),
+    format(user_error, '--- Hunter Server Online on 8081 ---~n', []).
+
+:- http_handler(root(action), handle_hunter_request, []).
