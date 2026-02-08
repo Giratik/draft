@@ -17,29 +17,17 @@
 :- use_module(library(option)).
 
 % ==============================================================================
-% 2. BACKGROUND KNOWLEDGE (Deterministic & CLP(FD))
+% 2. HELPER PREDICATES (Non-Probabilistic, Reified)
 % ==============================================================================
 
-% --- Bridges for reif ---
+% Bridges for reif
 bool_to_t(1, true).
 bool_to_t(0, false).
 
 fd_gt_t(X, Y, T) :- X #> Y #<==> B, bool_to_t(B, T).
 member_t(Elem, List, T) :- memberd_t(Elem, List, T).
 
-% --- World Logic (Pure Prolog/CLP) ---
-valid_grid(X, Y, Size) :- 
-    X #>= 1, X #=< Size,
-    Y #>= 1, Y #=< Size.
-
-start_pos(1, 1).
-
-adjacent(X, Y, NX, NY, Size) :- valid_grid(NX, NY, Size), NX #= X,     NY #= Y + 1.
-adjacent(X, Y, NX, NY, Size) :- valid_grid(NX, NY, Size), NX #= X,     NY #= Y - 1.
-adjacent(X, Y, NX, NY, Size) :- valid_grid(NX, NY, Size), NX #= X + 1, NY #= Y.
-adjacent(X, Y, NX, NY, Size) :- valid_grid(NX, NY, Size), NX #= X - 1, NY #= Y.
-
-% --- Reified Helper for Decision Logic ---
+% Reified valid_grid for Strategy (Decision Making)
 valid_grid_t(X, Y, Size, T) :- 
     X #>= 1 #<==> B1,
     X #=< Size #<==> B2,
@@ -49,42 +37,61 @@ valid_grid_t(X, Y, Size, T) :-
     bool_to_t(BAll, T).
 
 % ==============================================================================
-% 3. BRIDGE PREDICATES FOR PITA
-% ==============================================================================
-% PITA transforms predicates in the lpad block to have 2 extra arguments 
-% (EnvironmentIn, EnvironmentOut). We must provide these signatures for 
-% background predicates so PITA can call them. We simply pass P through.
-
-valid_grid(X, Y, Size, P, P) :- valid_grid(X, Y, Size).
-
-start_pos(X, Y, P, P) :- start_pos(X, Y).
-
-adjacent(X, Y, NX, NY, Size, P, P) :- adjacent(X, Y, NX, NY, Size).
-
-% ==============================================================================
-% 4. PROBABILISTIC LOGIC (LPAD)
+% 3. PROBABILISTIC LOGIC (LPAD)
 % ==============================================================================
 :- pita.
 :- begin_lpad.
 
-% --- Priors Dynamiques ---
+% --- Background Knowledge (Internal to LPAD) ---
+% We use clpfd + labeling to ensure PITA receives integers, not attributes.
+
+valid_grid(X, Y, Size) :- 
+    X #>= 1, X #=< Size,
+    Y #>= 1, Y #=< Size,
+    labeling([], [X, Y]).
+
+start_pos(1, 1).
+
+adjacent(X, Y, NX, NY, Size) :- 
+    % Define relative positions using clpfd
+    ( NX #= X,     NY #= Y + 1
+    ; NX #= X,     NY #= Y - 1
+    ; NX #= X + 1, NY #= Y
+    ; NX #= X - 1, NY #= Y
+    ),
+    % Validate and Label (Essential for PITA to work with clpfd)
+    valid_grid(NX, NY, Size).
+
+% --- Probabilistic Model ---
+
+% Dynamic Priors based on grid size
 pit(X,Y, Size):Prob :- 
-    valid_grid(X,Y, Size), \+ start_pos(X,Y),
+    valid_grid(X,Y, Size), 
+    \+ start_pos(X,Y),
     Prob is 0.75 / Size.
 
 wumpus(X,Y, Size):Prob :- 
-    valid_grid(X,Y, Size), \+ start_pos(X,Y),
+    valid_grid(X,Y, Size), 
+    \+ start_pos(X,Y),
     Prob is 0.25 / Size.
 
-% --- Causalité ---
-breeze(X, Y, Size) :- adjacent(X, Y, NX, NY, Size), pit(NX, NY, Size).
-stench(X, Y, Size) :- adjacent(X, Y, NX, NY, Size), wumpus(NX, NY, Size).
-safe(X,Y, Size)    :- \+ pit(X,Y, Size), \+ wumpus(X,Y, Size).
+% Causal Rules
+breeze(X, Y, Size) :- 
+    adjacent(X, Y, NX, NY, Size), 
+    pit(NX, NY, Size).
+
+stench(X, Y, Size) :- 
+    adjacent(X, Y, NX, NY, Size), 
+    wumpus(NX, NY, Size).
+
+safe(X, Y, Size) :- 
+    \+ pit(X, Y, Size), 
+    \+ wumpus(X, Y, Size).
 
 :- end_lpad.
 
 % ==============================================================================
-% 5. DECISION STRATEGY
+% 4. DECISION STRATEGY
 % ==============================================================================
 
 decide_action(X, Y, Dir, Visited, History, Percepts, Size, HasGold, Action) :-
@@ -106,7 +113,6 @@ choose_directional_move(X, Y, Dir, Visited, History, Size, HasGold, Action) :-
     evaluate_utility(LX, LY, Evidence, Visited, Size, HasGold, UL),
     format(user_error, '  [SCORES] Front: ~w, Right: ~w, Left: ~w~n', [UF, UR, UL]),
     
-    % Deterministic decision based on scores
     if_(fd_gt_t(UL, UF), 
         if_(fd_gt_t(UL, UR), Action = left, Action = right),
         if_(fd_gt_t(UR, UF), Action = right, Action = move)).
@@ -119,20 +125,26 @@ evaluate_utility(X, Y, Evidence, Visited, Size, HasGold, Utility) :-
         Utility #= 0).
 
 is_safe_t(X, Y, Evidence, Size, T) :-
+    % Probabilistic Inference
     ( prob((safe(X, Y, Size), Evidence), P_Joint),
       prob(Evidence, P_Ev),
-      P_Ev > 0.00001
+      P_Ev > 0.000001
     -> P is P_Joint / P_Ev
     ;  P = 0.5 ),
+    
     PInt is round(P * 100),
     format(user_error, '   > Cell (~w,~w) P(Safe)=~2f ', [X, Y, P]),
+    
+    % Decision Threshold (0.75)
     if_(fd_gt_t(PInt, 75), 
         (format(user_error, '[SAFE]~n', []), T = true), 
         (format(user_error, '[DANGER]~n', []), T = false)).
 
 calculate_goal_utility(X, Y, Visited, HasGold, Utility) :-
     if_(HasGold = true,
+        % Phase 2: Return to (1,1)
         (Dist #= abs(X - 1) + abs(Y - 1), Utility #= 100 - Dist),
+        % Phase 1: Explore
         if_(member_t([X, Y], Visited), Utility #= 10, Utility #= 50)).
 
 get_front_cell(X, Y, north, X, FY) :- FY #= Y + 1.
@@ -146,7 +158,7 @@ next_dir_left(north, west).  next_dir_left(west, south).
 next_dir_left(south, east).  next_dir_left(east, north).
 
 % ==============================================================================
-% 6. INFRASTRUCTURE & HANDLERS
+% 5. INFRASTRUCTURE & HANDLERS
 % ==============================================================================
 
 build_evidence(History, Visited, Size, EvidenceConj) :-
