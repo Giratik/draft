@@ -26,6 +26,10 @@ bool_to_t(0, false).
 fd_gt_t(X, Y, T) :- X #> Y #<==> B, bool_to_t(B, T).
 member_t(Elem, List, T) :- memberd_t(Elem, List, T).
 
+% Reified exit check for the strategy
+should_exit_t(X, Y, MissionComplete, T) :-
+    (X == 1, Y == 1, MissionComplete == true -> T = true ; T = false).
+
 % Reified valid_grid for Strategy
 valid_grid_t(X, Y, Size, T) :- 
     X #>= 1 #<==> B1,
@@ -41,9 +45,7 @@ valid_grid_t(X, Y, Size, T) :-
 :- pita.
 :- begin_lpad.
 
-% --- Background Knowledge ---
-% PITA requires concrete integers. We use labeling inside background predicates.
-
+% Background Knowledge with concrete integers for PITA
 valid_grid(X, Y, Size) :- 
     X #>= 1, X #=< Size,
     Y #>= 1, Y #=< Size,
@@ -59,8 +61,7 @@ adjacent(X, Y, NX, NY, Size) :-
     ),
     valid_grid(NX, NY, Size).
 
-% --- Probabilistic Model ---
-
+% Probabilistic Model
 pit(X,Y, Size):Prob :- 
     valid_grid(X,Y, Size), 
     \+ start_pos(X,Y),
@@ -89,32 +90,39 @@ safe(X, Y, Size) :-
 % 4. DECISION STRATEGY
 % ==============================================================================
 
-decide_action(X, Y, Dir, Visited, History, Percepts, Size, HasGold, Action) :-
-    if_(member_t(glitter, Percepts), 
-        (format(user_error, '  -> REFLEX: Gold Found!~n', []), Action = grab),
-        if_(member_t(bump, Percepts), 
-            (format(user_error, '  -> REFLEX: Bump!~n', []), Action = right), 
-            choose_directional_move(X, Y, Dir, Visited, History, Size, HasGold, Action))).
+decide_action(X, Y, Dir, Visited, History, Percepts, Size, MissionComplete, Action) :-
+    % 1. PRIORITY: Exit if at (1,1) and mission is complete
+    if_(should_exit_t(X, Y, MissionComplete),
+         (format(user_error, '  -> MISSION SUCCESS: Climbing out!~n', []), Action = climb),
+         
+         % 2. REFLEXES
+         if_(member_t(glitter, Percepts), 
+            (format(user_error, '  -> REFLEX: Gold Found!~n', []), Action = grab),
+            if_(member_t(bump, Percepts), 
+                (format(user_error, '  -> REFLEX: Bump!~n', []), Action = right), 
+                
+                % 3. STRATEGIC MOVEMENT
+                choose_directional_move(X, Y, Dir, Visited, History, Size, MissionComplete, Action)
+            )
+         )
+    ).
 
-choose_directional_move(X, Y, Dir, Visited, History, Size, HasGold, Action) :-
+choose_directional_move(X, Y, Dir, Visited, History, Size, MissionComplete, Action) :-
     build_evidence(History, Visited, Size, Evidence),
     
     get_front_cell(X, Y, Dir, FX, FY),
-    evaluate_utility(FX, FY, Evidence, Visited, Size, HasGold, UF),
+    evaluate_utility(FX, FY, Evidence, Visited, Size, MissionComplete, UF),
     
     next_dir_right(Dir, RDir),
     get_front_cell(X, Y, RDir, RX, RY),
-    evaluate_utility(RX, RY, Evidence, Visited, Size, HasGold, UR),
+    evaluate_utility(RX, RY, Evidence, Visited, Size, MissionComplete, UR),
     
     next_dir_left(Dir, LDir),
     get_front_cell(X, Y, LDir, LX, LY),
-    evaluate_utility(LX, LY, Evidence, Visited, Size, HasGold, UL),
+    evaluate_utility(LX, LY, Evidence, Visited, Size, MissionComplete, UL),
     
     format(user_error, '  [SCORES] Front: ~w, Right: ~w, Left: ~w~n', [UF, UR, UL]),
     
-    % Decision Logic:
-    % 1. If Front is SAFE (Score > 0), behave normally.
-    % 2. If Front is DANGER (Score 0), FORCE TURN (Right or Left).
     if_(fd_gt_t(UF, 0),
         % Normal: Choose best score
         if_(fd_gt_t(UL, UF), 
@@ -125,10 +133,10 @@ choose_directional_move(X, Y, Dir, Visited, History, Size, HasGold, Action) :-
         if_(fd_gt_t(UL, UR), Action = left, Action = right)
     ).
 
-evaluate_utility(X, Y, Evidence, Visited, Size, HasGold, Utility) :-
+evaluate_utility(X, Y, Evidence, Visited, Size, MissionComplete, Utility) :-
     if_(valid_grid_t(X, Y, Size),
         if_(is_safe_t(X, Y, Evidence, Size),
-            calculate_goal_utility(X, Y, Visited, HasGold, Utility),
+            calculate_goal_utility(X, Y, Visited, MissionComplete, Utility),
             Utility #= 0),
         Utility #= 0).
 
@@ -142,19 +150,18 @@ is_safe_t(X, Y, Evidence, Size, T) :-
     PInt is round(P * 100),
     format(user_error, '   > Cell (~w,~w) P(Safe)=~2f ', [X, Y, P]),
     
-    % Threshold 75%
     if_(fd_gt_t(PInt, 75), 
         (format(user_error, '[SAFE]~n', []), T = true), 
         (format(user_error, '[DANGER]~n', []), T = false)).
 
-calculate_goal_utility(X, Y, Visited, HasGold, Utility) :-
-    if_(HasGold = true,
+calculate_goal_utility(X, Y, Visited, MissionComplete, Utility) :-
+    if_(MissionComplete = true,
         % Phase 2: Return to Start (1,1)
         (Dist #= abs(X - 1) + abs(Y - 1), Utility #= 100 - Dist),
         % Phase 1: Exploration
         if_(member_t([X, Y], Visited), 
             Utility #= 10,  % Already visited
-            Utility #= 50   % New safe cell (PRIORITY)
+            Utility #= 50   % New safe cell
         )).
 
 get_front_cell(X, Y, north, X, FY) :- FY #= Y + 1.
@@ -219,17 +226,16 @@ handle_put_logic(Request) :-
     Beliefs = CleanJSON.get(beliefs, _{}),
     Percepts = CleanJSON.get(percepts, []),
     
-    extract_state(Beliefs, X, Y, Dir, Visited, Size, HasGold),
+    extract_state(Beliefs, X, Y, Dir, Visited, Size, MissionComplete),
     
-    % LOG MODE for Debugging
-    (HasGold == true -> Mode = 'RETURN' ; Mode = 'EXPLORE'),
+    (MissionComplete == true -> Mode = 'RETURN/EXIT' ; Mode = 'EXPLORE'),
     format(user_error, '--- TOUR (Size ~w) --- Pos: ~w,~w --- Mode: ~w ---~n', [Size, X, Y, Mode]),
     
     OldHistory = Beliefs.get(percept_history, []),
     CurrentMemory = _{x:X, y:Y, percepts:Percepts},
     NewHistory = [CurrentMemory | OldHistory],
     
-    decide_action(X, Y, Dir, Visited, NewHistory, Percepts, Size, HasGold, Action),
+    decide_action(X, Y, Dir, Visited, NewHistory, Percepts, Size, MissionComplete, Action),
     format(user_error, '  -> Decision: ~w~n', [Action]),
     
     Response = _{
@@ -242,23 +248,26 @@ handle_method(Method, _) :-
     format(user_error, '[WARNING] Unknown method: ~w~n', [Method]),
     reply_json_dict(_{error: "Method not allowed"}, [status(405)]).
 
-extract_state(Beliefs, X, Y, Dir, Visited, Size, HasGold) :-
+extract_state(Beliefs, X, Y, Dir, Visited, Size, MissionComplete) :-
     Fluents = Beliefs.get(certain_fluents, _{}),
     H = Fluents.get(fat_hunter, _{}), C = H.get(c, _{}),
     X is round(C.get(x, 1)), 
     Y is round(C.get(y, 1)), 
     Size is round(Beliefs.get(gridSize, 4)),
     
-    % Robust HasGold check: Key must exist AND value must be true-like
-    (   get_dict(has_gold, Fluents, Val),
-        Val \== false, 
-        Val \== 'false', 
-        Val \== 0,
-        Val \== []
-    ->  HasGold = true
-    ;   HasGold = false
-    ),
+    % Mission Status Logic
+    (get_dict(wumpuses, Beliefs, WList), is_list(WList) 
+    -> length(WList, WTotal) 
+    ;  WTotal = 1),
     
+    (get_dict(has_gold, Fluents, GVal) ->
+        (is_list(GVal) -> length(GVal, GCount)
+        ; GVal \== false, GVal \== 0 -> GCount = 1
+        ; GCount = 0)
+    ; GCount = 0),
+
+    (GCount >= WTotal -> MissionComplete = true ; MissionComplete = false),
+
     (get_dict(dir, Fluents, DL), member(DirObj, DL), get_dict(d, DirObj, D) -> Dir = D ; Dir = north),
     (get_dict(visited, Fluents, VL) -> 
         findall([VX, VY], (member(VObj, VL), get_dict(to, VObj, VTo), VX is round(VTo.x), VY is round(VTo.y)), Visited)

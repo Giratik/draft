@@ -17691,3 +17691,431 @@ Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
 			   visited: []
 			 }
 Calculated Next Percepts: [breeze]completed(132, 0.0625, 424, 200, ok).
+/*Sun Feb 08 12:38:55 2026*/ request(133, 1770550735.084, [peer(ip(127,0,0,1)),method(options),request_uri('/default'),path('/default'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),access_control_request_method('PUT'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(133, 0.0, 0, 200, ok).
+/*Sun Feb 08 12:38:55 2026*/ request(134, 1770550735.100, [peer(ip(127,0,0,1)),method(put),request_uri('/default'),path('/default'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0'),content_length(0)]).
+completed(134, 0.0, 2476, 200, ok).
+/*Sun Feb 08 12:42:32 2026*/ request(135, 1770550952.878, [peer(ip(127,0,0,1)),method(options),request_uri('/default'),path('/default'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),access_control_request_method('PUT'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(135, 0.0, 0, 200, ok).
+/*Sun Feb 08 12:42:32 2026*/ request(136, 1770550952.886, [peer(ip(127,0,0,1)),method(put),request_uri('/default'),path('/default'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0'),content_length(0)]).
+completed(136, 0.015625, 2476, 200, ok).
+/*Sun Feb 08 12:42:37 2026*/ request(137, 1770550957.624, [peer(ip(127,0,0,1)),method(options),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),access_control_request_method('PUT'),access_control_request_headers('content-type'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(137, 0.0, 0, 200, ok).
+/*Sun Feb 08 12:42:37 2026*/ request(138, 1770550957.633, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(2223),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+SIM: Received Action move
+Updating State w/ action: moveCalculating effects of move 
+Trying case 1 for Move 
+Trying case 2 for Move 
+Trying case 3 for Move 
+Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
+			   dir: [dir{d:north,h:hunter{id:hunter}}],
+			   fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+			   fat_hunter: fat{ c: c{x:1,y:2},
+					    h: hunter{id:hunter}
+					  },
+			   game_state: running,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [],
+			   score: -1,
+			   visited: [v{from:c{x:1,y:1},to:c{x:1,y:2}}]
+			 }
+Calculated Next Percepts: [stench]completed(138, 0.03125, 469, 200, ok).
+/*Sun Feb 08 12:42:41 2026*/ request(139, 1770550961.635, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(2266),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+SIM: Received Action right
+Updating State w/ action: rightCalculating effects of right 
+Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
+			   dir: [dir{d:east,h:hunter{id:hunter}}],
+			   fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+			   fat_hunter: _{c:_{x:1,y:2},h:_{id:hunter}},
+			   game_state: running,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [],
+			   score: -2,
+			   visited: [_{from:_{x:1,y:1},to:_{x:1,y:2}}]
+			 }
+Calculated Next Percepts: [stench]completed(139, 0.046875, 468, 200, ok).
+/*Sun Feb 08 12:42:43 2026*/ request(140, 1770550963.965, [peer(ip(127,0,0,1)),method(options),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),access_control_request_method('PUT'),access_control_request_headers('content-type'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(140, 0.0, 0, 200, ok).
+/*Sun Feb 08 12:42:43 2026*/ request(141, 1770550963.977, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(2307),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+SIM: Received Action right
+Updating State w/ action: rightCalculating effects of right 
+Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
+			   dir: [dir{d:south,h:hunter{id:hunter}}],
+			   fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+			   fat_hunter: _{c:_{x:1,y:2},h:_{id:hunter}},
+			   game_state: running,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [],
+			   score: -3,
+			   visited: [_{from:_{x:1,y:1},to:_{x:1,y:2}}]
+			 }
+Calculated Next Percepts: [stench]completed(141, 0.046875, 469, 200, ok).
+/*Sun Feb 08 12:42:45 2026*/ request(142, 1770550965.959, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(2306),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+SIM: Received Action move
+Updating State w/ action: moveCalculating effects of move 
+Trying case 1 for Move 
+Trying case 2 for Move 
+Trying case 3 for Move 
+Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
+			   dir: [dir{d:south,h:hunter{id:hunter}}],
+			   fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+			   fat_hunter: fat{ c: c{x:1,y:1},
+					    h: hunter{id:hunter}
+					  },
+			   game_state: running,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [],
+			   score: -4,
+			   visited: [ v{from:c{x:1,y:2},to:c{x:1,y:1}},
+				      _{from:_{x:1,y:1},to:_{x:1,y:2}}
+				    ]
+			 }
+Calculated Next Percepts: []completed(142, 0.046875, 521, 200, ok).
+/*Sun Feb 08 12:42:48 2026*/ request(143, 1770550968.306, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(2349),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+SIM: Received Action left
+Updating State w/ action: leftCalculating effects of left 
+Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
+			   dir: [dir{d:east,h:hunter{id:hunter}}],
+			   fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+			   fat_hunter: _{c:_{x:1,y:1},h:_{id:hunter}},
+			   game_state: running,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [],
+			   score: -5,
+			   visited: [ _{from:_{x:1,y:2},to:_{x:1,y:1}},
+				      _{from:_{x:1,y:1},to:_{x:1,y:2}}
+				    ]
+			 }
+Calculated Next Percepts: []completed(143, 0.09375, 520, 200, ok).
+/*Sun Feb 08 12:42:50 2026*/ request(144, 1770550970.753, [peer(ip(127,0,0,1)),method(options),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),access_control_request_method('PUT'),access_control_request_headers('content-type'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(144, 0.0, 0, 200, ok).
+/*Sun Feb 08 12:42:50 2026*/ request(145, 1770550970.767, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(2390),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+SIM: Received Action move
+Updating State w/ action: moveCalculating effects of move 
+Trying case 1 for Move 
+Trying case 2 for Move 
+Trying case 3 for Move 
+Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
+			   dir: [dir{d:east,h:hunter{id:hunter}}],
+			   fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+			   fat_hunter: fat{ c: c{x:2,y:1},
+					    h: hunter{id:hunter}
+					  },
+			   game_state: running,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [],
+			   score: -6,
+			   visited: [ v{from:c{x:1,y:1},to:c{x:2,y:1}},
+				      _{from:_{x:1,y:2},to:_{x:1,y:1}},
+				      _{from:_{x:1,y:1},to:_{x:1,y:2}}
+				    ]
+			 }
+Calculated Next Percepts: [breeze]completed(145, 0.09375, 580, 200, ok).
+/*Sun Feb 08 12:42:53 2026*/ request(146, 1770550973.313, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(2431),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+SIM: Received Action left
+Updating State w/ action: leftCalculating effects of left 
+Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
+			   dir: [dir{d:north,h:hunter{id:hunter}}],
+			   fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+			   fat_hunter: _{c:_{x:2,y:1},h:_{id:hunter}},
+			   game_state: running,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [],
+			   score: -7,
+			   visited: [ _{from:_{x:1,y:1},to:_{x:2,y:1}},
+				      _{from:_{x:1,y:2},to:_{x:1,y:1}},
+				      _{from:_{x:1,y:1},to:_{x:1,y:2}}
+				    ]
+			 }
+Calculated Next Percepts: [breeze]completed(146, 0.046875, 581, 200, ok).
+/*Sun Feb 08 12:42:55 2026*/ request(147, 1770550975.474, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(2474),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+SIM: Received Action move
+Updating State w/ action: moveCalculating effects of move 
+Trying case 1 for Move 
+Trying case 2 for Move 
+Trying case 3 for Move 
+Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
+			   dir: [dir{d:north,h:hunter{id:hunter}}],
+			   fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+			   fat_hunter: fat{ c: c{x:2,y:2},
+					    h: hunter{id:hunter}
+					  },
+			   game_state: running,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [],
+			   score: -8,
+			   visited: [ v{from:c{x:2,y:1},to:c{x:2,y:2}},
+				      _{from:_{x:1,y:1},to:_{x:2,y:1}},
+				      _{from:_{x:1,y:2},to:_{x:1,y:1}},
+				      _{from:_{x:1,y:1},to:_{x:1,y:2}}
+				    ]
+			 }
+Calculated Next Percepts: []completed(147, 0.0625, 623, 200, ok).
+/*Sun Feb 08 12:42:58 2026*/ request(148, 1770550978.986, [peer(ip(127,0,0,1)),method(options),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),access_control_request_method('PUT'),access_control_request_headers('content-type'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(148, 0.0, 0, 200, ok).
+/*Sun Feb 08 12:42:58 2026*/ request(149, 1770550978.994, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(2517),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+SIM: Received Action move
+Updating State w/ action: moveCalculating effects of move 
+Trying case 1 for Move 
+Trying case 2 for Move 
+Trying case 3 for Move 
+Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
+			   dir: [dir{d:north,h:hunter{id:hunter}}],
+			   fat_gold: [_{c:_{x:2,y:3},g:_{id:gold1}}],
+			   fat_hunter: fat{ c: c{x:2,y:3},
+					    h: hunter{id:hunter}
+					  },
+			   game_state: running,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [],
+			   score: -9,
+			   visited: [ v{from:c{x:2,y:2},to:c{x:2,y:3}},
+				      _{from:_{x:2,y:1},to:_{x:2,y:2}},
+				      _{from:_{x:1,y:1},to:_{x:2,y:1}},
+				      _{from:_{x:1,y:2},to:_{x:1,y:1}},
+				      _{from:_{x:1,y:1},to:_{x:1,y:2}}
+				    ]
+			 }
+Calculated Next Percepts: [glitter,breeze,stench]completed(149, 0.03125000000000022, 704, 200, ok).
+/*Sun Feb 08 12:43:01 2026*/ request(150, 1770550981.459, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(2601),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+SIM: Received Action grab
+Updating State w/ action: grabCalculating effects of grab 
+Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
+			   dir: [_{d:north,h:_{id:hunter}}],
+			   fat_gold: [],
+			   fat_hunter: fat{ c: _{x:2,y:3},
+					    h: hunter{id:hunter}
+					  },
+			   game_state: running,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [ has{ g: gold{id:gold1},
+					    h: hunter{id:hunter}
+					  }
+				     ],
+			   score: -10,
+			   visited: [ _{from:_{x:2,y:2},to:_{x:2,y:3}},
+				      _{from:_{x:2,y:1},to:_{x:2,y:2}},
+				      _{from:_{x:1,y:1},to:_{x:2,y:1}},
+				      _{from:_{x:1,y:2},to:_{x:1,y:1}},
+				      _{from:_{x:1,y:1},to:_{x:1,y:2}}
+				    ]
+			 }
+Calculated Next Percepts: [breeze,stench]completed(150, 0.015625, 696, 200, ok).
+/*Sun Feb 08 12:43:05 2026*/ request(151, 1770550985.111, [peer(ip(127,0,0,1)),method(options),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),access_control_request_method('PUT'),access_control_request_headers('content-type'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(151, 0.0, 0, 200, ok).
+/*Sun Feb 08 12:43:05 2026*/ request(152, 1770550985.119, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(2647),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+SIM: Received Action right
+Updating State w/ action: rightCalculating effects of right 
+Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
+			   dir: [dir{d:east,h:hunter{id:hunter}}],
+			   fat_gold: [],
+			   fat_hunter: _{c:_{x:2,y:3},h:_{id:hunter}},
+			   game_state: running,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [_{g:_{id:gold1},h:_{id:hunter}}],
+			   score: -11,
+			   visited: [ _{from:_{x:2,y:2},to:_{x:2,y:3}},
+				      _{from:_{x:2,y:1},to:_{x:2,y:2}},
+				      _{from:_{x:1,y:1},to:_{x:2,y:1}},
+				      _{from:_{x:1,y:2},to:_{x:1,y:1}},
+				      _{from:_{x:1,y:1},to:_{x:1,y:2}}
+				    ]
+			 }
+Calculated Next Percepts: [breeze,stench]completed(152, 0.03125, 695, 200, ok).
+/*Sun Feb 08 12:43:07 2026*/ request(153, 1770550987.179, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(2649),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+SIM: Received Action right
+Updating State w/ action: rightCalculating effects of right 
+Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
+			   dir: [dir{d:south,h:hunter{id:hunter}}],
+			   fat_gold: [],
+			   fat_hunter: _{c:_{x:2,y:3},h:_{id:hunter}},
+			   game_state: running,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [_{g:_{id:gold1},h:_{id:hunter}}],
+			   score: -12,
+			   visited: [ _{from:_{x:2,y:2},to:_{x:2,y:3}},
+				      _{from:_{x:2,y:1},to:_{x:2,y:2}},
+				      _{from:_{x:1,y:1},to:_{x:2,y:1}},
+				      _{from:_{x:1,y:2},to:_{x:1,y:1}},
+				      _{from:_{x:1,y:1},to:_{x:1,y:2}}
+				    ]
+			 }
+Calculated Next Percepts: [breeze,stench]completed(153, 0.046875, 696, 200, ok).
+/*Sun Feb 08 12:43:09 2026*/ request(154, 1770550989.383, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(2648),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+SIM: Received Action move
+Updating State w/ action: moveCalculating effects of move 
+Trying case 1 for Move 
+Trying case 2 for Move 
+Trying case 3 for Move 
+Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
+			   dir: [dir{d:south,h:hunter{id:hunter}}],
+			   fat_gold: [],
+			   fat_hunter: fat{ c: c{x:2,y:2},
+					    h: hunter{id:hunter}
+					  },
+			   game_state: running,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [_{g:_{id:gold1},h:_{id:hunter}}],
+			   score: -13,
+			   visited: [ v{from:c{x:2,y:3},to:c{x:2,y:2}},
+				      _{from:_{x:2,y:2},to:_{x:2,y:3}},
+				      _{from:_{x:2,y:1},to:_{x:2,y:2}},
+				      _{from:_{x:1,y:1},to:_{x:2,y:1}},
+				      _{from:_{x:1,y:2},to:_{x:1,y:1}},
+				      _{from:_{x:1,y:1},to:_{x:1,y:2}}
+				    ]
+			 }
+Calculated Next Percepts: []completed(154, 0.046875, 728, 200, ok).
+/*Sun Feb 08 12:43:11 2026*/ request(155, 1770550991.955, [peer(ip(127,0,0,1)),method(options),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),access_control_request_method('PUT'),access_control_request_headers('content-type'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(155, 0.0, 0, 200, ok).
+/*Sun Feb 08 12:43:11 2026*/ request(156, 1770550991.969, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(2691),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+SIM: Received Action move
+Updating State w/ action: moveCalculating effects of move 
+Trying case 1 for Move 
+Trying case 2 for Move 
+Trying case 3 for Move 
+Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
+			   dir: [dir{d:south,h:hunter{id:hunter}}],
+			   fat_gold: [],
+			   fat_hunter: fat{ c: c{x:2,y:1},
+					    h: hunter{id:hunter}
+					  },
+			   game_state: running,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [_{g:_{id:gold1},h:_{id:hunter}}],
+			   score: -14,
+			   visited: [ v{from:c{x:2,y:2},to:c{x:2,y:1}},
+				      _{from:_{x:2,y:3},to:_{x:2,y:2}},
+				      _{from:_{x:2,y:2},to:_{x:2,y:3}},
+				      _{from:_{x:2,y:1},to:_{x:2,y:2}},
+				      _{from:_{x:1,y:1},to:_{x:2,y:1}},
+				      _{from:_{x:1,y:2},to:_{x:1,y:1}},
+				      _{from:_{x:1,y:1},to:_{x:1,y:2}}
+				    ]
+			 }
+Calculated Next Percepts: [breeze]completed(156, 0.03125, 788, 200, ok).
+/*Sun Feb 08 12:43:14 2026*/ request(157, 1770550994.304, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(2776),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+SIM: Received Action right
+Updating State w/ action: rightCalculating effects of right 
+Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
+			   dir: [dir{d:west,h:hunter{id:hunter}}],
+			   fat_gold: [],
+			   fat_hunter: _{c:_{x:2,y:1},h:_{id:hunter}},
+			   game_state: running,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [_{g:_{id:gold1},h:_{id:hunter}}],
+			   score: -15,
+			   visited: [ _{from:_{x:2,y:2},to:_{x:2,y:1}},
+				      _{from:_{x:2,y:3},to:_{x:2,y:2}},
+				      _{from:_{x:2,y:2},to:_{x:2,y:3}},
+				      _{from:_{x:2,y:1},to:_{x:2,y:2}},
+				      _{from:_{x:1,y:1},to:_{x:2,y:1}},
+				      _{from:_{x:1,y:2},to:_{x:1,y:1}},
+				      _{from:_{x:1,y:1},to:_{x:1,y:2}}
+				    ]
+			 }
+Calculated Next Percepts: [breeze]completed(157, 0.03125, 787, 200, ok).
+/*Sun Feb 08 12:43:17 2026*/ request(158, 1770550997.352, [peer(ip(127,0,0,1)),method(options),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),access_control_request_method('PUT'),access_control_request_headers('content-type'),referer('http://localhost:9000/'),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=4')]).
+completed(158, 0.0, 0, 200, ok).
+/*Sun Feb 08 12:43:17 2026*/ request(159, 1770550997.365, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(2816),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+SIM: Received Action move
+Updating State w/ action: moveCalculating effects of move 
+Trying case 1 for Move 
+Trying case 2 for Move 
+Trying case 3 for Move 
+Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
+			   dir: [dir{d:west,h:hunter{id:hunter}}],
+			   fat_gold: [],
+			   fat_hunter: fat{ c: c{x:1,y:1},
+					    h: hunter{id:hunter}
+					  },
+			   game_state: running,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [_{g:_{id:gold1},h:_{id:hunter}}],
+			   score: -16,
+			   visited: [ v{from:c{x:2,y:1},to:c{x:1,y:1}},
+				      _{from:_{x:2,y:2},to:_{x:2,y:1}},
+				      _{from:_{x:2,y:3},to:_{x:2,y:2}},
+				      _{from:_{x:2,y:2},to:_{x:2,y:3}},
+				      _{from:_{x:2,y:1},to:_{x:2,y:2}},
+				      _{from:_{x:1,y:1},to:_{x:2,y:1}},
+				      _{from:_{x:1,y:2},to:_{x:1,y:1}},
+				      _{from:_{x:1,y:1},to:_{x:1,y:2}}
+				    ]
+			 }
+Calculated Next Percepts: []completed(159, 0.046875, 829, 200, ok).
+/*Sun Feb 08 12:43:20 2026*/ request(160, 1770551000.450, [peer(ip(127,0,0,1)),method(put),request_uri('/sim'),path('/sim'),http_version(1-1),host(localhost),port(8080),user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0'),referer('http://localhost:9000/'),content_type('application/json'),content_length(2858),origin('http://localhost:9000'),connection('keep-alive'),sec_fetch_dest(empty),sec_fetch_mode(cors),sec_fetch_site('same-site'),priority('u=0')]).
+SIM: Received Action climb
+Updating State w/ action: climbCalculating effects of climb 
+Calculated Next Fluents:_{ alive: [_{id:hunter},_{id:wumpus1}],
+			   dir: [_{d:west,h:_{id:hunter}}],
+			   fat_gold: [],
+			   fat_hunter: fat{ c: _{x:1,y:1},
+					    h: hunter{id:hunter}
+					  },
+			   game_state: finished,
+			   has_arrow: [ _{ a: _{id:arrow1},
+					   h: _{id:hunter}
+					 }
+				      ],
+			   has_gold: [_{g:_{id:gold1},h:_{id:hunter}}],
+			   score: 984,
+			   visited: [ _{from:_{x:2,y:1},to:_{x:1,y:1}},
+				      _{from:_{x:2,y:2},to:_{x:2,y:1}},
+				      _{from:_{x:2,y:3},to:_{x:2,y:2}},
+				      _{from:_{x:2,y:2},to:_{x:2,y:3}},
+				      _{from:_{x:2,y:1},to:_{x:2,y:2}},
+				      _{from:_{x:1,y:1},to:_{x:2,y:1}},
+				      _{from:_{x:1,y:2},to:_{x:1,y:1}},
+				      _{from:_{x:1,y:1},to:_{x:1,y:2}}
+				    ]
+			 }
+Calculated Next Percepts: []completed(160, 0.0625, 830, 200, ok).
