@@ -271,7 +271,24 @@ extract_state(Beliefs, X, Y, Dir, Visited, Size, HasGold) :-
     H = Fluents.get(fat_hunter, _{}), C = H.get(c, _{}),
     X is round(C.get(x, 1)), 
     Y is round(C.get(y, 1)), 
-    Size is round(Beliefs.get(gridSize, 4)),
+    
+        % --- DEDUCTION INTELLIGENTE DE LA TAILLE ---
+    (   % 1. Si le JSON contient déjà gridSize (via le fix TypeScript), on l'utilise
+        get_dict(gridSize, Beliefs, RawSize), RawSize > 0
+    ->  Size is round(RawSize)
+    ;   
+        % 2. Sinon, on la DÉDUIT comme server.pl : Taille = RacineCarrée(Nb_Cellules)
+        get_dict(certain_eternals, Beliefs, Eternals),
+        get_dict(cells, Eternals, Cells),
+        is_list(Cells),
+        length(Cells, TotalCells),
+        TotalCells > 0
+    ->  Size is round(sqrt(TotalCells))
+    ;   
+        % 3. Fallback : Valeur par défaut si tout échoue
+        Size = 4 
+    ),
+    % -------------------------------------------
     
     % Check has_gold list: true if not empty, false otherwise
     (   get_dict(has_gold, Fluents, GoldList),
