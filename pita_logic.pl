@@ -17,7 +17,7 @@
 :- use_module(library(option)).
 
 % ==============================================================================
-% 2. HELPER PREDICATES (Non-Probabilistic, Reified)
+% 2. HELPER PREDICATES 
 % ==============================================================================
 
 bool_to_t(1, true).
@@ -26,7 +26,7 @@ bool_to_t(0, false).
 fd_gt_t(X, Y, T) :- X #> Y #<==> B, bool_to_t(B, T).
 member_t(Elem, List, T) :- memberd_t(Elem, List, T).
 
-% Reified valid_grid for Strategy
+% Reified valid_grid
 valid_grid_t(X, Y, Size, T) :- 
     X #>= 1 #<==> B1,
     X #=< Size #<==> B2,
@@ -41,8 +41,7 @@ valid_grid_t(X, Y, Size, T) :-
 :- pita.
 :- begin_lpad.
 
-% --- Background Knowledge ---
-% PITA requires concrete integers. We use labeling inside background predicates.
+% --- Monde Dynamique ---
 
 valid_grid(X, Y, Size) :- 
     X #>= 1, X #=< Size,
@@ -82,6 +81,7 @@ stench(X, Y, Size) :-
 safe(X, Y, Size) :- 
     \+ pit(X, Y, Size), 
     \+ wumpus(X, Y, Size).
+
 
 :- end_lpad.
 
@@ -127,7 +127,7 @@ choose_directional_move(X, Y, Dir, Visited, History, Size, HasGold, Action) :-
              Action = right
         )
     ;
-    % --- FIN MODIFICATION ---
+    % --- MOUVEMENT STANDARD ---
         if_(fd_gt_t(UF, 0),
             % Normal: Choose best score
             if_(fd_gt_t(UL, UF), 
@@ -149,8 +149,8 @@ evaluate_utility(X, Y, Evidence, Visited, Size, HasGold, Utility) :-
 is_safe_t(X, Y, Evidence, Visited, Size, T) :-
     % 1. PRIORITÉ ABSOLUE : Si la case est visitée, elle est SÛRE.
     if_(member_t([X, Y], Visited),
-        (
-            format(user_error, '   > Cell (~w,~w) [KNOWN SAFE - VISITED]~n', [X, Y]), 
+        (format(user_error, '   > Cell (~w,~w) [KNOWN SAFE - VISITED]~n', 
+            [X, Y]), 
             T = true
         ),
         
